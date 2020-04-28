@@ -1,0 +1,13 @@
+#Ignore C# compilation output
+*/obj
+*/bin
+
+#Ignore LaTeX compilation output
+*.aux
+*.log
+
+
+#Ignore image files and movie files
+*.png
+*.jpg
+*.amv
