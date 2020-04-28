@@ -15,7 +15,7 @@ namespace DataPreparer
         ///Prepares one image
         ///Uses file name as a label, label search terminates at '_' after '_' signifies sample number
         ///</summary>
-        public static ImageLearningData PrepareImage(string path, int targetWidth, int targetHeight, int id)
+        public static ImageLearningData PrepareImage(string path, int targetWidth, int targetHeight)
         {
 
             int paddingRatio = 12;
@@ -35,10 +35,6 @@ namespace DataPreparer
 
             Bitmap cropped = CropBitmap(croppedToRatio, rect);
             Bitmap resized = new Bitmap(cropped, new Size(targetWidth, targetHeight));
-
-            cropped.Save("../../../TestResults/gen/c" + id + ".png");
-            croppedToRatio.Save("../../../TestResults/gen/ctr" + id + ".png");
-            resized.Save("../../../TestResults/gen/s" + id + ".png");
 
             BitmapData data = original.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             int depth = Bitmap.GetPixelFormatSize(data.PixelFormat) / 8; //bytes per pixel
@@ -77,7 +73,7 @@ namespace DataPreparer
             ImageLearningData[] result = new ImageLearningData[files.Length];
             for (int i = 0; i < files.Length; i++)
             {
-                result[i] = PrepareImage(files[i], 200, 100, i);
+                result[i] = PrepareImage(files[i], 200, 100);
             }
             return result;
         }
