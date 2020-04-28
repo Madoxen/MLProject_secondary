@@ -1,6 +1,6 @@
 namespace DataPreparer
 {
-    public class ImageData
+    public struct ImageData
     {
 
 

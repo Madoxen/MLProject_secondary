@@ -11,3 +11,8 @@
 *.png
 *.jpg
 *.amv
+
+
+#Ignore VS code and VS indexers
+.vscode
+.vs
