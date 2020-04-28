@@ -1,0 +1,3 @@
+[submodule "deps/SSI"]
+	path = deps/SSI
+	url = https://github.com/Madoxen/SSI
