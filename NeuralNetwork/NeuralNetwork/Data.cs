@@ -43,16 +43,8 @@ namespace NeuralNetwork
                 Console.Write(inputs[i].ToString("0.0") + " ");
 
             List<double> outputs = network.GetOutput();
-            Console.Write("\n Species: ");
-            double sum = 0; foreach (double i in outputs) sum += Math.Abs(i);
-            if (outputs.Max() < 0.75 || sum > 1.5)
-                Console.Write("uncertain");
-            else
-            {
-                string[] names = { "Iris-virginica", "Iris-versicolor", "Iris-setosa" };
-                Console.Write(names[outputs.IndexOf(outputs.Max())]);
-            }
-            Console.WriteLine();
+            string[] names = { "Iris-virginica", "Iris-versicolor", "Iris-setosa" };
+            Console.WriteLine($"\n Species: {names[outputs.IndexOf(outputs.Max())]}");
         }
 
         public static double[][][] PrepareIrises(double[][] data)

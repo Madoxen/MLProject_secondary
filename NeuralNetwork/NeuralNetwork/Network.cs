@@ -6,7 +6,7 @@ namespace NeuralNetwork
 {
     class Network
     {
-        static double coefficient = 0.5;
+        static double LearningRate = 0.01;
         internal List<Layer> Layers;
         internal double[][] ExpectedResult;
         double[][] differences;
@@ -45,7 +45,7 @@ namespace NeuralNetwork
             Layers.Add(inputlayer);
         }
 
-        public void AddNextLayer(Layer newlayer)
+        private void AddNextLayer(Layer newlayer)
         {
             Layer lastlayer = Layers[Layers.Count - 1];
             lastlayer.ConnectLayers(newlayer);
@@ -87,6 +87,7 @@ namespace NeuralNetwork
             PushExpectedValues(expectedoutputs);
 
             Console.WriteLine(" Training neural network...");
+            double recenterror = double.MaxValue, minerror = double.MaxValue;
             for (int i = 0; i < epochscount; i++)
             {
                 List<double> outputs = new List<double>();
@@ -96,13 +97,15 @@ namespace NeuralNetwork
                     outputs = GetOutput();
                     ChangeWeights(outputs, j);
                 }
-                Test(testinputs, testoutputs);
+                recenterror = Test(testinputs, testoutputs);
+                if (minerror < recenterror) break;
+                minerror = recenterror;
             }
             //Test(testinputs, testoutputs);
             SaveWeights(@"weights.txt");
         }
 
-        private void Test(double[][] inputs, double[][] expectedoutputs)
+        private double Test(double[][] inputs, double[][] expectedoutputs)
         {
             double error = 0; 
             List<double> outputs = new List<double>();
@@ -113,7 +116,8 @@ namespace NeuralNetwork
                 error += Functions.CalculateError(outputs, i, expectedoutputs);
             }
             error /= inputs.Length;
-            Console.WriteLine(" Average mean square error: " + (Math.Round(error, 5)).ToString());
+            Console.WriteLine($" Average mean square error: {Math.Round(error, 5)}");
+            return error;
         }
 
         private void CalculateDifferences(List<double> outputs, int row)
@@ -138,16 +142,12 @@ namespace NeuralNetwork
                 for (int i = 0; i < Layers[k].Neurons.Count; i++)
                     for (int j = 0; j < Layers[k - 1].Neurons.Count; j++)
                         Layers[k].Neurons[i].Inputs[j].Weight += 
-                            coefficient * 2 * differences[k][i] * Layers[k - 1].Neurons[j].OutputValue;
+                            LearningRate * 2 * differences[k][i] * Layers[k - 1].Neurons[j].OutputValue;
         }
 
         private void SaveWeights(string path)
         {
-            List<string> tmp = new List<string>();
-            foreach (Layer layer in Layers)
-                foreach (Neuron neuron in layer.Neurons)
-                    foreach (Synapse synapse in neuron.Inputs)
-                        tmp.Add(synapse.Weight.ToString());
+            List<string> tmp = ReadWeights();
             File.WriteAllLines(path, tmp);
         }
 
@@ -163,6 +163,16 @@ namespace NeuralNetwork
             }
             catch (Exception e) { Console.WriteLine(" Incorrect input file"); }
 
+        }
+
+        private List<string> ReadWeights()
+        {
+            List<string> tmp = new List<string>();
+            foreach (Layer layer in Layers)
+                foreach (Neuron neuron in layer.Neurons)
+                    foreach (Synapse synapse in neuron.Inputs)
+                        tmp.Add(synapse.Weight.ToString());
+            return tmp;
         }
     }
 }
