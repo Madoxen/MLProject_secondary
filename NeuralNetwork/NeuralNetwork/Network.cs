@@ -79,26 +79,41 @@ namespace NeuralNetwork
             return output;
         }
 
-        public void Train(double[][] inputs, double maxerror)
+        public void Train(double[][] data, double epochscount)
         {
+            double[][][] sets = Data.PrepareIrises(data);
+            double[][] inputs = sets[0], expectedoutputs = sets[1];
+            double[][] testinputs = sets[2], testoutputs = sets[3];
+            PushExpectedValues(expectedoutputs);
+
             Console.WriteLine(" Training neural network...");
-            double error = double.MaxValue;
-            while (error / inputs.Length > maxerror)
+            for (int i = 0; i < epochscount; i++)
             {
-                error = 0;
                 List<double> outputs = new List<double>();
                 for (int j = 0; j < inputs.Length; j++)
                 {
                     PushInputValues(inputs[j]);
                     outputs = GetOutput();
                     ChangeWeights(outputs, j);
-                    error += Functions.CalculateError(outputs, j, ExpectedResult);
                 }
-                Console.WriteLine(" Actual error: " + (error/inputs.Length).ToString());  // testing error
+                Test(testinputs, testoutputs);
             }
-            Console.WriteLine(" Done! Average mean square error: " + (Math.Round(error / inputs.Length, 5)).ToString() + "\n");
-
+            //Test(testinputs, testoutputs);
             SaveWeights(@"weights.txt");
+        }
+
+        private void Test(double[][] inputs, double[][] expectedoutputs)
+        {
+            double error = 0; 
+            List<double> outputs = new List<double>();
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                PushInputValues(inputs[i]);
+                outputs = GetOutput();
+                error += Functions.CalculateError(outputs, i, expectedoutputs);
+            }
+            error /= inputs.Length;
+            Console.WriteLine(" Average mean square error: " + (Math.Round(error, 5)).ToString());
         }
 
         private void CalculateDifferences(List<double> outputs, int row)
@@ -138,11 +153,16 @@ namespace NeuralNetwork
 
         private void LoadWeights(string[] lines)
         {
-            int i = 0;
-            foreach (Layer layer in Layers)
-                foreach (Neuron neuron in layer.Neurons)
-                    foreach (Synapse synapse in neuron.Inputs)
-                        synapse.Weight = Double.Parse(lines[i++]);
+            try
+            {
+                int i = 0;
+                foreach (Layer layer in Layers)
+                    foreach (Neuron neuron in layer.Neurons)
+                        foreach (Synapse synapse in neuron.Inputs)
+                            synapse.Weight = Double.Parse(lines[i++]);
+            }
+            catch (Exception e) { Console.WriteLine(" Incorrect input file"); }
+
         }
     }
 }

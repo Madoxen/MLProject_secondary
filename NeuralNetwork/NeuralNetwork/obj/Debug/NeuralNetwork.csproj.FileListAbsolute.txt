@@ -10,3 +10,9 @@ C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt\NeuralNetwork\Neur
 C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.csprojAssemblyReference.cache
 C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.exe
 C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.pdb
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\bin\Debug\NeuralNetwork.exe.config
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\bin\Debug\NeuralNetwork.exe
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\bin\Debug\NeuralNetwork.pdb
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.csprojAssemblyReference.cache
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.exe
+C:\Users\mkami\Desktop\Systemy sztucznej inteligencji\Projekt II\NeuralNetwork\NeuralNetwork\obj\Debug\NeuralNetwork.pdb

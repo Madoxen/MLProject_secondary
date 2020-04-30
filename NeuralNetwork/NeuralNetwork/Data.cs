@@ -10,7 +10,7 @@ namespace NeuralNetwork
         public static void Shuffle(double[] data)
         {
             Random rnd = new Random();
-            int x = 0; int n = data.Length; double y = 0;
+            int x = 0, n = data.Length; double y = 0;
             for (int i = 0; i < n - 1; i++)
             {
                 x = i + rnd.Next(n - i); y = data[x];
@@ -38,21 +38,71 @@ namespace NeuralNetwork
         public static void ClassifyIris(double[] inputs, Network network)
         {
             network.PushInputValues(inputs);
-            Console.Write("\n Wprowadzone dane: ");
+            Console.Write("\n Input data: ");
             for (int i = 0; i < inputs.Length; i++) 
                 Console.Write(inputs[i].ToString("0.0") + " ");
 
             List<double> outputs = network.GetOutput();
-            Console.Write("\n Gatunek: ");
+            Console.Write("\n Species: ");
             double sum = 0; foreach (double i in outputs) sum += Math.Abs(i);
             if (outputs.Max() < 0.75 || sum > 1.5)
-                Console.Write("nieokreślony");
+                Console.Write("uncertain");
             else
             {
                 string[] names = { "Iris-virginica", "Iris-versicolor", "Iris-setosa" };
                 Console.Write(names[outputs.IndexOf(outputs.Max())]);
             }
             Console.WriteLine();
+        }
+
+        public static double[][][] PrepareIrises(double[][] data)
+        {
+            // Dividing data into Training Set and Testing Set
+            List<double[]> trainingset_list = new List<double[]>();
+            List<double[]> testingset_list = new List<double[]>();
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (i % 5 == 0) testingset_list.Add(data[i]);
+                else trainingset_list.Add(data[i]);
+            }
+            double[][] TrainingSet = trainingset_list.ToArray();
+            double[][] TestingSet = testingset_list.ToArray();
+
+            // Shuffling Training Set
+            double[] numbers = new double[TrainingSet.Length];
+            for (int i = 0; i < TrainingSet.Length; i++) 
+                numbers[i] = i;
+            Shuffle(numbers);
+            double[][] tmpdata = new double[TrainingSet.Length][];
+            for (int i = 0; i < numbers.Length; i++)
+                tmpdata[i] = TrainingSet[(int)numbers[i]];
+            TrainingSet = tmpdata;
+
+            // Dividing sets into Inputs and Expected Outputs
+            double[][] TrainingDataInput = new double[TrainingSet.Length][];
+            double[][] TrainingDataOutput = new double[TrainingSet.Length][];
+            for (int i = 0; i < TrainingSet.Length; i++)
+            {
+                TrainingDataInput[i] = new double[4]; 
+                TrainingDataOutput[i] = new double[3];
+                for (int j = 0; j < 4; j++) 
+                    TrainingDataInput[i][j] = TrainingSet[i][j];
+                for (int j = 4; j < 7; j++) 
+                    TrainingDataOutput[i][j - 4] = TrainingSet[i][j];
+            }
+            double[][] TestingDataInput = new double[TestingSet.Length][];
+            double[][] TestingDataOutput = new double[TestingSet.Length][];
+            for (int i = 0; i < TestingSet.Length; i++)
+            {
+                TestingDataInput[i] = new double[4];
+                TestingDataOutput[i] = new double[3];
+                for (int j = 0; j < 4; j++)
+                    TestingDataInput[i][j] = TestingSet[i][j];
+                for (int j = 4; j < 7; j++)
+                    TestingDataOutput[i][j - 4] = TestingSet[i][j];
+            }
+
+            return new double[][][] { TrainingDataInput, TrainingDataOutput, TestingDataInput, TestingDataOutput };
         }
     }
 }
