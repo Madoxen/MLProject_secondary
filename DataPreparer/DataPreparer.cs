@@ -7,7 +7,7 @@ using System;
 namespace DataPreparer
 {
     //Prepares data from images
-    public static class DataPreparer
+    public static class ImageDataPreparer
     {
 
 
@@ -22,34 +22,49 @@ namespace DataPreparer
             //Extract data
             Bitmap original = new Bitmap(path);
 
-   
-            //Perform cropping and resize
 
+            //Perform cropping and resize
             Bitmap croppedToRatio = CropToRatio(original, 2.0);
 
-                     Rectangle rect = new Rectangle(croppedToRatio.Width / paddingRatio,
-            croppedToRatio.Height / paddingRatio,
-            croppedToRatio.Width - (2 * (croppedToRatio.Width / paddingRatio)),
-            croppedToRatio.Height - (2 * (croppedToRatio.Height / paddingRatio)));
+            Rectangle rect = new Rectangle(croppedToRatio.Width / paddingRatio,
+   croppedToRatio.Height / paddingRatio,
+   croppedToRatio.Width - (2 * (croppedToRatio.Width / paddingRatio)),
+   croppedToRatio.Height - (2 * (croppedToRatio.Height / paddingRatio)));
 
 
             Bitmap cropped = CropBitmap(croppedToRatio, rect);
             Bitmap resized = new Bitmap(cropped, new Size(targetWidth, targetHeight));
-
-            BitmapData data = original.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            int depth = Bitmap.GetPixelFormatSize(data.PixelFormat) / 8; //bytes per pixel
+            BitmapData data = resized.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            int depth = 3; //bytes per pixel
             byte[] buffer = new byte[data.Width * data.Height * depth];
 
             //copy pixels to buffer
-            Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
-            original.UnlockBits(data);
+            unsafe
+            {
+                int Height = resized.Height;
+                int Width = resized.Width;
+                int pos = 0;
+                byte* ptr = (byte*)data.Scan0;
+                for (int y = 0; y < Height; y++)
+                {
+                    byte* ptr2 = ptr;
+                    for (int x = 0; x < Width; x++)
+                    {
+                        buffer[pos++] = *(ptr2++); //B
+                        buffer[pos++] = *(ptr2++); //G
+                        buffer[pos++] = *(ptr2++); //R
+                    }
+                    ptr += data.Stride;
+                }
+            }
+
+            resized.UnlockBits(data);
 
             //Extract label
             string fileName = Path.GetFileNameWithoutExtension(path);
             string[] tokens = fileName.Split("_");
             string label = tokens[0];
             int number = Convert.ToInt32(tokens[1]);
-
 
             //Free GDI handles
             resized.Dispose();
@@ -67,13 +82,13 @@ namespace DataPreparer
         ///</summary>
         /// <param name="path">Path to directory that contains images</param>
         /// <returns></returns>
-        public static ImageLearningData[] PrepareImages(string path)
+        public static ImageLearningData[] PrepareImages(string path, int width, int height)
         {
             string[] files = Directory.GetFiles(path, "*.jpg");
             ImageLearningData[] result = new ImageLearningData[files.Length];
             for (int i = 0; i < files.Length; i++)
             {
-                result[i] = PrepareImage(files[i], 200, 100);
+                result[i] = PrepareImage(files[i], width, height);
             }
             return result;
         }
@@ -95,7 +110,7 @@ namespace DataPreparer
                 Rectangle rect = new Rectangle(cropAmount / 2,
                 0,
                 input.Width - cropAmount,
-                input.Height );
+                input.Height);
 
                 Bitmap target = new Bitmap(rect.Width, rect.Height);
 
