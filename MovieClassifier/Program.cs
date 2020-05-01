@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NeuralNetwork
+namespace MovieClassifier
 {
     class Program
     {
@@ -15,6 +15,7 @@ namespace NeuralNetwork
                 Data.ClassifyIris(new double[] { data[i][0], data[i][1], data[i][2], data[i][3] }, network);
 
             Console.ReadKey();
+            
         }
     }
 }

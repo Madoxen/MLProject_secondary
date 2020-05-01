@@ -37,7 +37,7 @@ namespace DataPreparer
             BitmapData data = resized.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             int depth = 3; //bytes per pixel
             byte[] buffer = new byte[data.Width * data.Height * depth];
-            
+
             //copy pixels to buffer
             unsafe
             {
