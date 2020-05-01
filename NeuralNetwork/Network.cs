@@ -4,24 +4,24 @@ using System.IO;
 
 namespace NeuralNetwork
 {
-    class Network
+    public class Network
     {
         static double LearningRate = 0.01;
         internal List<Layer> Layers;
         internal double[][] ExpectedResult;
         double[][] differences;
 
-        public Network(int inputneuronscount, int hiddenlayerscount, int hiddenneuronscount, int outputneuronscount, string path = null)
+        public Network(int numInputNeurons, int numHiddenLayers, int numHiddenNeurons, int numOutputNeurons, string path = null)
         {
             Console.WriteLine("\n Building neural network...");
-            if (inputneuronscount < 1 || hiddenlayerscount < 1 || hiddenneuronscount < 1 || outputneuronscount < 1)
+            if (numInputNeurons < 1 || numHiddenLayers < 1 || numHiddenNeurons < 1 || numOutputNeurons < 1)
                 throw new Exception("Incorrect Network Parameters");
 
             Layers = new List<Layer>();
-            AddFirstLayer(inputneuronscount);
-            for (int i = 0; i < hiddenlayerscount; i++) 
-                AddNextLayer(new Layer(hiddenneuronscount));
-            AddNextLayer(new Layer(outputneuronscount));
+            AddFirstLayer(numInputNeurons);
+            for (int i = 0; i < numHiddenLayers; i++) 
+                AddNextLayer(new Layer(numHiddenNeurons));
+            AddNextLayer(new Layer(numOutputNeurons));
 
             differences = new double[Layers.Count][];
             for (int i = 1; i < Layers.Count; i++) 
@@ -79,16 +79,25 @@ namespace NeuralNetwork
             return output;
         }
 
-        public void Train(double[][] data, double epochscount)
+
+        /// <summary>
+        /// Trains network with given data
+        /// </summary>
+        /// <param name="data">
+        /// [0] -> Input Data to be evaluated
+        /// [1] -> Expected Output Data
+        /// [2] -> Test Input Data
+        /// [3] -> Test Output Data</param>
+        /// <param name="epochCount"></param>
+        public void Train(double[][][] data, int epochCount)
         {
-            double[][][] sets = Data.PrepareIrises(data);
-            double[][] inputs = sets[0], expectedoutputs = sets[1];
-            double[][] testinputs = sets[2], testoutputs = sets[3];
-            PushExpectedValues(expectedoutputs);
+            double[][] inputs = data[0], expectedOutputs = data[1];
+            double[][] testInputs = data[2], testOutputs = data[3];
+            PushExpectedValues(expectedOutputs);
 
             Console.WriteLine(" Training neural network...");
-            double recenterror = double.MaxValue, minerror = double.MaxValue;
-            for (int i = 0; i < epochscount; i++)
+            double recentError = double.MaxValue, minError = double.MaxValue;
+            for (int i = 0; i < epochCount; i++)
             {
                 List<double> outputs = new List<double>();
                 for (int j = 0; j < inputs.Length; j++)
@@ -97,9 +106,9 @@ namespace NeuralNetwork
                     outputs = GetOutput();
                     ChangeWeights(outputs, j);
                 }
-                recenterror = Test(testinputs, testoutputs);
-                if (minerror < recenterror) break;
-                minerror = recenterror;
+                recentError = Test(testInputs, testOutputs);
+                if (minError < recentError) break;
+                minError = recentError;
             }
             //Test(testinputs, testoutputs);
             SaveWeights(@"weights.txt");

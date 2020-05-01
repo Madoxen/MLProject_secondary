@@ -13,7 +13,7 @@ namespace DataPreparerTests
         [TestMethod]
         public void TestDataCount()
         {
-            ImageLearningData ld = DataPreparer.DataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
+            ImageLearningData ld = DataPreparer.ImageDataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
 
             Assert.AreEqual(200, ld.width);
             Assert.AreEqual(100, ld.height);
@@ -24,7 +24,7 @@ namespace DataPreparerTests
         [TestMethod]
         public void TestDataCorrectness()
         {
-            var a = DataPreparer.DataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
+            var a = DataPreparer.ImageDataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
             Bitmap b = new Bitmap("Resources/target_1.bmp");
             int dataPos = 0;
             for (int i = 0; i < b.Height; i++)

@@ -7,7 +7,7 @@ using System;
 namespace DataPreparer
 {
     //Prepares data from images
-    public static class DataPreparer
+    public static class ImageDataPreparer
     {
 
 
@@ -50,9 +50,9 @@ namespace DataPreparer
                     byte* ptr2 = ptr;
                     for (int x = 0; x < Width; x++)
                     {
-                        buffer[pos++] = *(ptr2++);
-                        buffer[pos++] = *(ptr2++);
-                        buffer[pos++] = *(ptr2++);
+                        buffer[pos++] = *(ptr2++); //B
+                        buffer[pos++] = *(ptr2++); //G
+                        buffer[pos++] = *(ptr2++); //R
                     }
                     ptr += data.Stride;
                 }
@@ -82,13 +82,13 @@ namespace DataPreparer
         ///</summary>
         /// <param name="path">Path to directory that contains images</param>
         /// <returns></returns>
-        public static ImageLearningData[] PrepareImages(string path)
+        public static ImageLearningData[] PrepareImages(string path, int width, int height)
         {
             string[] files = Directory.GetFiles(path, "*.jpg");
             ImageLearningData[] result = new ImageLearningData[files.Length];
             for (int i = 0; i < files.Length; i++)
             {
-                result[i] = PrepareImage(files[i], 200, 100);
+                result[i] = PrepareImage(files[i], width, height);
             }
             return result;
         }

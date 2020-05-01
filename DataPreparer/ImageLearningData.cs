@@ -9,7 +9,7 @@ namespace DataPreparer
 
         /// <summary>
         /// Array containing raw data
-        /// n = R, n+1 = G, n+2 = B;
+        /// in BGR format
         /// </summary>
         public ReadOnlyCollection<double> data;
 

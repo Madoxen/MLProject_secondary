@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NeuralNetwork\NeuralNetwork.csproj" />
     <ProjectReference Include="..\DataPreparer\DataPreparer.csproj" />
+       <None Update="Resources\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>
