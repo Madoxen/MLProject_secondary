@@ -19,10 +19,11 @@ namespace MovieClassifier
             int outputCount = 3; // we need to know this in advance to avoid back tracking through images
 
 
-
             Network net = new Network(imageWidth * imageHeight * imageDepth, 2, 1000, outputCount);
             double[][][] finalData =  Loader.Load("Resources",outputCount,imageWidth,imageHeight);
 
+
+            net.RandomizeWeights();
             net.Train(finalData, 10);
             net.PushInputValues(finalData[2][1]);
 
