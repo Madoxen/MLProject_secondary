@@ -3,7 +3,7 @@ import screen_maker as sm
 import sys
 import time
 
-begin_offset = 50 #seconds
+begin_offset = 0 #seconds
 
 name = ""
 try:
