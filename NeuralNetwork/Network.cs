@@ -19,12 +19,12 @@ namespace NeuralNetwork
 
             Layers = new List<Layer>();
             AddFirstLayer(numInputNeurons);
-            for (int i = 0; i < numHiddenLayers; i++) 
+            for (int i = 0; i < numHiddenLayers; i++)
                 AddNextLayer(new Layer(numHiddenNeurons));
             AddNextLayer(new Layer(numOutputNeurons));
 
             differences = new double[Layers.Count][];
-            for (int i = 1; i < Layers.Count; i++) 
+            for (int i = 1; i < Layers.Count; i++)
                 differences[i] = new double[Layers[i].Neurons.Count];
 
             if (File.Exists(path))
@@ -40,7 +40,7 @@ namespace NeuralNetwork
         private void AddFirstLayer(int inputneuronscount)
         {
             Layer inputlayer = new Layer(inputneuronscount);
-            foreach (Neuron neuron in inputlayer.Neurons) 
+            foreach (Neuron neuron in inputlayer.Neurons)
                 neuron.AddInputSynapse(0);
             Layers.Add(inputlayer);
         }
@@ -54,16 +54,16 @@ namespace NeuralNetwork
 
         public void PushInputValues(double[] inputs)
         {
-            if (inputs.Length != Layers[0].Neurons.Count) 
+            if (inputs.Length != Layers[0].Neurons.Count)
                 throw new Exception("Incorrect Input Size");
 
-            for (int i = 0; i < inputs.Length; i++) 
+            for (int i = 0; i < inputs.Length; i++)
                 Layers[0].Neurons[i].PushValueOnInput(inputs[i]);
         }
 
-        public void PushExpectedValues(double[][] expectedvalues) 
+        public void PushExpectedValues(double[][] expectedvalues)
         {
-            if (expectedvalues[0].Length != Layers[Layers.Count - 1].Neurons.Count) 
+            if (expectedvalues[0].Length != Layers[Layers.Count - 1].Neurons.Count)
                 throw new Exception("Incorrect Expected Output Size");
 
             ExpectedResult = expectedvalues;
@@ -114,9 +114,17 @@ namespace NeuralNetwork
             SaveWeights(@"weights.txt");
         }
 
+        public void RandomizeWeights()
+        {
+            foreach(Layer l in Layers)
+            {
+                l.RandomizeWeights();
+            }
+        }
+
         private double Test(double[][] inputs, double[][] expectedoutputs)
         {
-            double error = 0; 
+            double error = 0;
             List<double> outputs = new List<double>();
             for (int i = 0; i < inputs.Length; i++)
             {
@@ -132,14 +140,14 @@ namespace NeuralNetwork
         private void CalculateDifferences(List<double> outputs, int row)
         {
             for (int i = 0; i < Layers[Layers.Count - 1].Neurons.Count; i++)
-                differences[Layers.Count - 1][i] = (ExpectedResult[row][i] - outputs[i]) 
+                differences[Layers.Count - 1][i] = (ExpectedResult[row][i] - outputs[i])
                     * Functions.BipolarDifferential(Layers[Layers.Count - 1].Neurons[i].InputValue);
             for (int k = Layers.Count - 2; k > 0; k--)
                 for (int i = 0; i < Layers[k].Neurons.Count; i++)
                 {
                     differences[k][i] = 0;
                     for (int j = 0; j < Layers[k + 1].Neurons.Count; j++)
-                        differences[k][i] += differences[k + 1][j] * Layers[k+1].Neurons[j].Inputs[i].Weight;
+                        differences[k][i] += differences[k + 1][j] * Layers[k + 1].Neurons[j].Inputs[i].Weight;
                     differences[k][i] *= Functions.BipolarDifferential(Layers[k].Neurons[i].InputValue);
                 }
         }
@@ -150,7 +158,7 @@ namespace NeuralNetwork
             for (int k = Layers.Count - 1; k > 0; k--)
                 for (int i = 0; i < Layers[k].Neurons.Count; i++)
                     for (int j = 0; j < Layers[k - 1].Neurons.Count; j++)
-                        Layers[k].Neurons[i].Inputs[j].Weight += 
+                        Layers[k].Neurons[i].Inputs[j].Weight +=
                             LearningRate * 2 * differences[k][i] * Layers[k - 1].Neurons[j].OutputValue;
         }
 
