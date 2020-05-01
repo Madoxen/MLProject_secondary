@@ -20,10 +20,10 @@ namespace MovieClassifier
 
 
 
-            Network net = new Network(imageWidth * imageHeight * imageDepth, 2, 100, outputCount);
+            Network net = new Network(imageWidth * imageHeight * imageDepth, 2, 1000, outputCount);
             double[][][] finalData =  Loader.Load("Resources",outputCount,imageWidth,imageHeight);
 
-            net.Train(finalData, 100);
+            net.Train(finalData, 10);
             net.PushInputValues(finalData[2][1]);
 
             //smol test

@@ -25,9 +25,9 @@ bld/
 
 
 #Ignore image files and movie files
-*.png
-*.jpg
-*.amv
+#*.png
+#*.jpg
+#*.amv
 
 
 #Ignore VS code and VS indexers
