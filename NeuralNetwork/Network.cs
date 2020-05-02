@@ -11,16 +11,27 @@ namespace NeuralNetwork
         internal double[][] ExpectedResult;
         double[][] differences;
 
-        public Network(int numInputNeurons, int numHiddenLayers, int numHiddenNeurons, int numOutputNeurons, string path = null)
+        public ITestStrategy testStrategy;
+        public bool TestHaltEnabled { get; set; }
+
+        public bool TestingEnabled { get; set; }
+
+        public Network(int numInputNeurons, int[] hiddenLayerSizes , int numOutputNeurons,
+        bool testHaltEnabled = false, bool testingEnabled = true, string path = null)
         {
             Console.WriteLine("\n Building neural network...");
-            if (numInputNeurons < 1 || numHiddenLayers < 1 || numHiddenNeurons < 1 || numOutputNeurons < 1)
+            if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
                 throw new Exception("Incorrect Network Parameters");
+
+            this.testStrategy = new MeanErrorTest(this);
+            this.TestHaltEnabled = testHaltEnabled;
+            this.TestingEnabled = testingEnabled;
+
 
             Layers = new List<Layer>();
             AddFirstLayer(numInputNeurons);
-            for (int i = 0; i < numHiddenLayers; i++)
-                AddNextLayer(new Layer(numHiddenNeurons));
+            for (int i = 0; i < hiddenLayerSizes.Length; i++)
+                AddNextLayer(new Layer(hiddenLayerSizes[i]));
             AddNextLayer(new Layer(numOutputNeurons));
 
             differences = new double[Layers.Count][];
@@ -96,7 +107,6 @@ namespace NeuralNetwork
             PushExpectedValues(expectedOutputs);
 
             Console.WriteLine(" Training neural network...");
-            double recentError = double.MaxValue, minError = double.MaxValue;
             for (int i = 0; i < epochCount; i++)
             {
                 List<double> outputs = new List<double>();
@@ -106,36 +116,25 @@ namespace NeuralNetwork
                     outputs = GetOutput();
                     ChangeWeights(outputs, j);
                 }
-                recentError = Test(testInputs, testOutputs);
-                if (minError < recentError) break;
-                minError = recentError;
+
+                if (TestingEnabled == true)
+                {
+                    testStrategy.Test(testInputs, testOutputs);
+                    if (testStrategy.CheckHalt() && TestHaltEnabled == true)
+                        break;
+                }
             }
-            //Test(testinputs, testoutputs);
             SaveWeights(@"weights.txt");
         }
 
         public void RandomizeWeights()
         {
-            foreach(Layer l in Layers)
+            foreach (Layer l in Layers)
             {
                 l.RandomizeWeights();
             }
         }
 
-        private double Test(double[][] inputs, double[][] expectedoutputs)
-        {
-            double error = 0;
-            List<double> outputs = new List<double>();
-            for (int i = 0; i < inputs.Length; i++)
-            {
-                PushInputValues(inputs[i]);
-                outputs = GetOutput();
-                error += Functions.CalculateError(outputs, i, expectedoutputs);
-            }
-            error /= inputs.Length;
-            Console.WriteLine($" Average mean square error: {Math.Round(error, 5)}");
-            return error;
-        }
 
         private void CalculateDifferences(List<double> outputs, int row)
         {
@@ -162,13 +161,13 @@ namespace NeuralNetwork
                             LearningRate * 2 * differences[k][i] * Layers[k - 1].Neurons[j].OutputValue;
         }
 
-        private void SaveWeights(string path)
+        public void SaveWeights(string path)
         {
             List<string> tmp = ReadWeights();
             File.WriteAllLines(path, tmp);
         }
 
-        private void LoadWeights(string[] lines)
+        public void LoadWeights(string[] lines)
         {
             try
             {

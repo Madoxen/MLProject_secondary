@@ -45,7 +45,7 @@ namespace NeuralNetwork
             {
                 foreach (Synapse s in n.Inputs)
                 {
-                    s.Weight = r.NextGaussianDouble(0, 1 / Math.Sqrt(n.Inputs.Count));
+                    s.Weight = r.NextDouble() * Math.Sqrt(2.0 / (Neurons.Count + n.Inputs.Count));
                 }
             }
         }
