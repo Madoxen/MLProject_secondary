@@ -6,7 +6,7 @@ namespace NeuralNetwork
 {
     public class Network
     {
-        static double LearningRate = 0.5;
+        static double LearningRate = 0.01;
         internal List<Layer> Layers;
         internal double[][] ExpectedResult;
         double[][] differences;
@@ -16,11 +16,11 @@ namespace NeuralNetwork
 
         public bool TestingEnabled { get; set; }
 
-        public Network(int numInputNeurons, int numHiddenLayers, int numHiddenNeurons, int numOutputNeurons,
+        public Network(int numInputNeurons, int[] hiddenLayerSizes , int numOutputNeurons,
         bool testHaltEnabled = false, bool testingEnabled = true, string path = null)
         {
             Console.WriteLine("\n Building neural network...");
-            if (numInputNeurons < 1 || numHiddenLayers < 1 || numHiddenNeurons < 1 || numOutputNeurons < 1)
+            if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
                 throw new Exception("Incorrect Network Parameters");
 
             this.testStrategy = new MeanErrorTest(this);
@@ -30,8 +30,8 @@ namespace NeuralNetwork
 
             Layers = new List<Layer>();
             AddFirstLayer(numInputNeurons);
-            for (int i = 0; i < numHiddenLayers; i++)
-                AddNextLayer(new Layer(numHiddenNeurons));
+            for (int i = 0; i < hiddenLayerSizes.Length; i++)
+                AddNextLayer(new Layer(hiddenLayerSizes[i]));
             AddNextLayer(new Layer(numOutputNeurons));
 
             differences = new double[Layers.Count][];
