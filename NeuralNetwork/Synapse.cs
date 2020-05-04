@@ -4,17 +4,18 @@ namespace NeuralNetwork
 {
     class Synapse
     {
-        static Random tmp = new Random();
+        static Random rnd = new Random();
         internal Neuron FromNeuron, ToNeuron;
         public double Weight { get; set; }
         public double PushedData { get; set; }
         public static int SynapsesCount { get; set; } = 0;
-        public static double WeightDivider { get; set; }
+        public static double MaxInitWeight { get; set; }
+        public static double MinInitWeight { get; set; }
 
         public Synapse(Neuron fromneuron, Neuron toneuron) // standard synapse
         {
             FromNeuron = fromneuron; ToNeuron = toneuron;
-            Weight = (tmp.NextDouble() - 0.5) / WeightDivider;
+            Weight = rnd.NextDouble() * (MaxInitWeight - MinInitWeight) + MinInitWeight;
             SynapsesCount += 1;
         }
 

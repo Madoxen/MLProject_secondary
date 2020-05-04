@@ -16,15 +16,16 @@ namespace NeuralNetwork
 
         public bool TestingEnabled { get; set; }
 
-        public Network(double learningrate, double alpha, double weightdivider, int numInputNeurons, int[] hiddenLayerSizes, 
-        int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
+        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons, 
+        int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
         {
             Console.WriteLine("\n Building neural network...");
             if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
                 throw new Exception("Incorrect Network Parameters");
 
             Functions.Alpha = alpha;
-            Synapse.WeightDivider = weightdivider;
+            Synapse.MinInitWeight = mininitweight;
+            Synapse.MaxInitWeight = maxinitweight;
             LearningRate = learningrate;
             this.testStrategy = new MeanErrorTest(this);
             this.TestHaltEnabled = testHaltEnabled;
