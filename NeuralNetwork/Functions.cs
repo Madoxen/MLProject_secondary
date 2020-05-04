@@ -5,7 +5,7 @@ namespace NeuralNetwork
 {
     class Functions
     {
-        public static double Alpha { get; set; } = 0.5;
+        public static double Alpha { get; set; }
 
         public static double CalculateError(List<double> outputs, int row, double[][] expectedresults) // objective function
         {
@@ -15,13 +15,12 @@ namespace NeuralNetwork
             return error;
         }
 
-        public static double InputSumFunction(List<Synapse> Inputs, double bias = 0) 
-            // input function: sum of products of synapses' weights and neurons' outputs plus bias
+        public static double InputSumFunction(List<Synapse> Inputs) 
+            // input function: sum of products of synapses' weights and neurons' outputs
         {
             double input = 0;
             foreach (Synapse syn in Inputs) 
                 input += syn.GetOutput();
-            input += bias;
             return input;
         }
 

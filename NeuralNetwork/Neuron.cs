@@ -35,7 +35,7 @@ namespace NeuralNetwork
 
         public void PushValueOnInput(double input) 
         { 
-            Inputs[0].OutputValue = input; 
+            Inputs[0].PushedData = input; 
         }
     }
 }

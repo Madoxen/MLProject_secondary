@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace ML.Lib
+namespace NeuralNetwork
 {
     public class Shuffler
     {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DataPreparer;
+using NeuralNetwork;
 
 namespace MovieClassifier
 {
@@ -43,7 +44,7 @@ namespace MovieClassifier
                     double[] input = data[i].data.ToArray();
 
                     //Decide between test set and learning set
-                    if (i % 5 == 0)
+                    if (i % 10 == 0)
                     {
                         testInputData.Add(input);
                         testOutputData.Add(output);
@@ -55,6 +56,20 @@ namespace MovieClassifier
                     }
                 }
             }
+
+            //Shuffling
+            int[] numbers = new int[inputData.Count];
+            for (int i = 0; i < numbers.Length; i++) numbers[i] = i;
+            Shuffler.Shuffle(numbers);
+            List<double[]> tmpInputData = new List<double[]>();
+            List<double[]> tmpOutputData = new List<double[]>();
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                tmpInputData.Add(inputData[numbers[i]]);
+                tmpOutputData.Add(expectedOutputData[numbers[i]]);
+            }
+            inputData = tmpInputData;
+            expectedOutputData = tmpOutputData;
 
             //Pack everything 
             finalData[0] = inputData.ToArray();
