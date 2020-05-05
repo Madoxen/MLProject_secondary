@@ -123,7 +123,7 @@ namespace NeuralNetwork
                     if (testStrategy.CheckHalt() && TestHaltEnabled == true)
                         break;
                     if (testStrategy.CheckRecord() && RecordSaveEnabled == true)
-                        SaveWeights(@"record_weights" + "_" + testStrategy.GetType().ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString());
+                        SaveWeights(@"record_weights" + "_" + testStrategy.GetType().Name.ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString());
                 }
             }
             SaveWeights(@"endingweights.txt");
