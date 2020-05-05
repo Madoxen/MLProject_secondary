@@ -16,7 +16,7 @@ namespace NeuralNetwork
 
         public bool TestingEnabled { get; set; }
 
-        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons, 
+        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons,
         int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
         {
             Console.WriteLine("\n Building neural network...");
@@ -125,9 +125,9 @@ namespace NeuralNetwork
 
         public void RandomizeWeights()
         {
-            foreach (Layer l in Layers)
+            for (int i = 1; i < Layers.Count; i++)
             {
-                l.RandomizeWeights();
+                Layers[i].RandomizeWeights();
             }
         }
 
