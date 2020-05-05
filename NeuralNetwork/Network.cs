@@ -7,6 +7,7 @@ namespace NeuralNetwork
     public class Network
     {
         static double LearningRate { get; set; }
+        static double SynapsesCount { get; set; }
         internal List<Layer> Layers;
         internal double[][] ExpectedResult;
         double[][] ErrorFunctionChanges;
@@ -17,7 +18,7 @@ namespace NeuralNetwork
         public bool TestingEnabled { get; set; }
 
         public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons, 
-        int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
+            int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
         {
             Console.WriteLine("\n Building neural network...");
             if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
@@ -37,6 +38,8 @@ namespace NeuralNetwork
             for (int i = 0; i < hiddenLayerSizes.Length; i++)
                 AddNextLayer(new Layer(hiddenLayerSizes[i]));
             AddNextLayer(new Layer(numOutputNeurons));
+
+            SynapsesCount = Synapse.SynapsesCount;
 
             ErrorFunctionChanges = new double[Layers.Count][];
             for (int i = 1; i < Layers.Count; i++)
@@ -97,9 +100,10 @@ namespace NeuralNetwork
         /// <param name="epochCount"></param>
         public void Train(double[][][] data, int epochCount)
         {
-            SaveWeights(@"startingweights.txt");
+            SaveNetworkToFile("weights.txt");
             double[][] inputs = data[0], expectedOutputs = data[1];
             double[][] testInputs = data[2], testOutputs = data[3];
+
             PushExpectedValues(expectedOutputs);
 
             Console.WriteLine(" Training neural network...");
@@ -120,7 +124,6 @@ namespace NeuralNetwork
                         break;
                 }
             }
-            SaveWeights(@"endingweights.txt");
         }
 
         public void RandomizeWeights()
@@ -156,33 +159,52 @@ namespace NeuralNetwork
                             LearningRate * 2 * ErrorFunctionChanges[k][i] * Layers[k - 1].Neurons[j].OutputValue;
         }
 
-        public void SaveWeights(string path)
+        public void SaveNetworkToFile(string path)
         {
             List<string> tmp = new List<string>();
-            foreach (Layer layer in Layers)
-                foreach (Neuron neuron in layer.Neurons)
+            for (int i = 1; i < Layers.Count; i++)
+                foreach (Neuron neuron in Layers[i].Neurons)
                     foreach (Synapse synapse in neuron.Inputs)
                         tmp.Add(synapse.Weight.ToString());
+            
+            string build = $"{LearningRate.ToString()} {Functions.Alpha.ToString()} {Synapse.MinInitWeight} {Synapse.MaxInitWeight}";
+            foreach (Layer layer in Layers) build += " " + layer.Neurons.Count.ToString();
+            tmp.Insert(0, build);
             File.WriteAllLines(path, tmp);
         }
 
-        public void LoadWeights(string[] lines)
+        // loading from .txt file where in first line there are: learning rate, alpha, minimum init weight, 
+        // maximum init weight and sizes of all layers - all separated by spaces; other lines are synapse weights 
+        // (one per line)
+        public static Network LoadNetworkFromFile(string path)
         {
+            // VALIDATION REQUIRED!
+            string[] lines = File.ReadAllLines(path);
+            string[] firstLine = lines[0].Split();
+            List<int> hiddenLayerSizes = new List<int>();
+            for (int i = 5; i < firstLine.Length - 1; i++) 
+                hiddenLayerSizes.Add(Convert.ToInt32(firstLine[i]));
+            
+            Network net = new Network(Double.Parse(firstLine[0]), Double.Parse(firstLine[1]), 
+                Double.Parse(firstLine[2]), Double.Parse(firstLine[3]), Convert.ToInt32(firstLine[4]), 
+                hiddenLayerSizes.ToArray(), Convert.ToInt32(firstLine[firstLine.Length - 1]));
+
             Console.WriteLine(" Loading weights...");
-            if (lines.Length != Synapse.SynapsesCount)
+            if (lines.Length - 1 != SynapsesCount)
                 Console.WriteLine(" Incorrect input file.");
             else
             {
                 try
                 {
-                    int i = 0;
-                    foreach (Layer layer in Layers)
-                        foreach (Neuron neuron in layer.Neurons)
+                    int i = 1;
+                    for (int j = 1; j < net.Layers.Count; j++)
+                        foreach (Neuron neuron in net.Layers[j].Neurons)
                             foreach (Synapse synapse in neuron.Inputs)
                                 synapse.Weight = Double.Parse(lines[i++]);
                 }
                 catch (Exception) { Console.WriteLine(" Incorrect input file."); }
             }
+            return net;
         }
     }
 }
