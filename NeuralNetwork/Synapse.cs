@@ -23,7 +23,6 @@ namespace NeuralNetwork
         {
             ToNeuron = toneuron; PushedData = data; 
             Weight = 1;
-            SynapsesCount += 1;
         }
 
         public double GetOutput()
