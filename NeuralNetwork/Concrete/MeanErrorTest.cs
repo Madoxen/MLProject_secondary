@@ -14,6 +14,8 @@ namespace NeuralNetwork
             set { minError = value; }
         }
 
+        public double CurrentRecord {get; private set;}
+
         private double recentError;
 
 
@@ -22,7 +24,6 @@ namespace NeuralNetwork
             this.network = network;
             this.minError = minError;
         }
-
 
         public double Test(double[][] inputs, double[][] expectedOutputs)
         {
@@ -37,6 +38,10 @@ namespace NeuralNetwork
             error /= inputs.Length;
             recentError = error;
             Console.WriteLine($" Average mean square error: {Math.Round(error, 5)}");
+             if(CurrentRecord > recentError)
+            {
+                CurrentRecord = recentError;
+            }
             return error;
         }
 

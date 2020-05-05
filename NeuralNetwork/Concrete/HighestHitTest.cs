@@ -15,6 +15,7 @@ namespace NeuralNetwork
         }
 
         private double recentPercentage;
+        public double CurrentRecord { get; private set; }
 
 
         public HighestHitTest(Network network, double minDelta = 0.001)
@@ -22,9 +23,6 @@ namespace NeuralNetwork
             this.network = network;
             this.minDelta = minDelta;
         }
-
-
-
 
         public double Test(double[][] inputs, double[][] expectedOutputs)
         {
@@ -35,12 +33,17 @@ namespace NeuralNetwork
             {
                 network.PushInputValues(inputs[i]);
                 outputs = network.GetOutput();
-                if(outputs.MaxAt() == expectedOutputs[i].MaxAt())
+                if (outputs.MaxAt() == expectedOutputs[i].MaxAt())
                     hits++;
             }
             hitPercentage = (double)hits / (double)inputs.Length;
             recentPercentage = hitPercentage;
-            Console.WriteLine($" Hit percentage : {Math.Round(hitPercentage*100.0, 3)}%");
+            Console.WriteLine($" Hit percentage : {Math.Round(hitPercentage * 100.0, 3)}%");
+            if(CurrentRecord < recentPercentage)
+            {
+                CurrentRecord = recentPercentage;
+            }
+
             return hitPercentage;
         }
 

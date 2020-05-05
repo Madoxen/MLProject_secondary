@@ -26,8 +26,8 @@ namespace MovieClassifier
             int[] hiddenNeurons = new int[args.Length - 4];
             for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            Network net = new Network(double.Parse(args[0].Replace(".",",")), double.Parse(args[1].Replace(".",",")), 
-                double.Parse(args[2].Replace(".",",")), double.Parse(args[3].Replace(".",",")), 
+            Network net = new Network(double.Parse(args[0].Replace(".", ",")), double.Parse(args[1].Replace(".", ",")),
+                double.Parse(args[2].Replace(".", ",")), double.Parse(args[3].Replace(".", ",")),
                 imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
             //net.LoadWeights(File.ReadAllLines("weights.txt"));
             net.testStrategy = new MeanErrorTest(net);
