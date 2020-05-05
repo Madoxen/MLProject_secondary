@@ -38,17 +38,22 @@ namespace NeuralNetwork
             hitPercentage = (double)hits / (double)inputs.Length;
             recentPercentage = hitPercentage;
             Console.WriteLine($" Hit percentage : {Math.Round(hitPercentage * 100.0, 3)}%");
-            if(CurrentRecord < recentPercentage)
-            {
-                CurrentRecord = recentPercentage;
-            }
-
             return hitPercentage;
         }
 
         public bool CheckHalt()
         {
             return recentPercentage >= maximumPercentageHalt;
+        }
+
+        public bool CheckRecord()
+        {
+            if (CurrentRecord < recentPercentage)
+            {
+                CurrentRecord = recentPercentage;
+                return true;
+            }
+            return false;
         }
     }
 
