@@ -132,9 +132,9 @@ namespace NeuralNetwork
 
         public void RandomizeWeights()
         {
-            foreach (Layer l in Layers)
+            for (int i = 1; i < Layers.Count; i++)
             {
-                l.RandomizeWeights();
+                Layers[i].RandomizeWeights();
             }
         }
 
