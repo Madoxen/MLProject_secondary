@@ -47,7 +47,7 @@ namespace NeuralNetwork
 
         public bool CheckHalt()
         {
-            return recentError < minError;
+            return recentError <= minError;
         }
     }
 
