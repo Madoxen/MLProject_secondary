@@ -17,8 +17,10 @@ namespace NeuralNetwork
 
         public bool TestingEnabled { get; set; }
 
-        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons, 
-            int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true)
+        public bool RecordSaveEnabled { get; set; }
+
+        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons,
+        int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true, bool recordSaveEnabled = true)
         {
             Console.WriteLine("\n Building neural network...");
             if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
@@ -31,7 +33,7 @@ namespace NeuralNetwork
             this.testStrategy = new MeanErrorTest(this);
             this.TestHaltEnabled = testHaltEnabled;
             this.TestingEnabled = testingEnabled;
-
+            this.RecordSaveEnabled = recordSaveEnabled;
 
             Layers = new List<Layer>();
             AddFirstLayer(numInputNeurons);
@@ -122,6 +124,8 @@ namespace NeuralNetwork
                     testStrategy.Test(testInputs, testOutputs);
                     if (testStrategy.CheckHalt() && TestHaltEnabled == true)
                         break;
+                    if (testStrategy.CheckRecord() && RecordSaveEnabled == true)
+                        SaveNetworkToFile(@"record_weights" + "_" + testStrategy.GetType().Name.ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString());
                 }
             }
         }
