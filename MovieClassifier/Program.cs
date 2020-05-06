@@ -14,7 +14,7 @@ namespace MovieClassifier
             //Tensor dimensions
             int imageWidth = 50;
             int imageHeight = 25;
-            //int imageDepth = 3; //number of colors
+            int imageDepth = 3; //number of colors
 
             int outputCount = 3; // we need to know this in advance to avoid back tracking through images
 
@@ -23,13 +23,13 @@ namespace MovieClassifier
             // args[2] - Minimum Init Weight
             // args[3] - Maximum Init Weight
             // args[4+] - Hidden Neurons
-            //int[] hiddenNeurons = new int[args.Length - 4];
-            //for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
+            int[] hiddenNeurons = new int[args.Length - 4];
+            for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            //Network net = new Network(double.Parse(args[0].Replace(".",",")), double.Parse(args[1].Replace(".",",")), 
-            //    double.Parse(args[2].Replace(".",",")), double.Parse(args[3].Replace(".",",")), 
-            //    imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
-            Network net = Network.LoadNetworkFromFile("weights1.txt");
+            Network net = new Network(double.Parse(args[0].Replace(".",",")), double.Parse(args[1].Replace(".",",")), 
+                double.Parse(args[2].Replace(".",",")), double.Parse(args[3].Replace(".",",")), 
+                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
+            //Network net = Network.LoadNetworkFromFile("weights.txt");
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
