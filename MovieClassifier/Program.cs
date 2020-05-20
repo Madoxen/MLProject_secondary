@@ -16,7 +16,7 @@ namespace MovieClassifier
             int imageHeight = 25;
             int imageDepth = 3; //number of colors
 
-            int outputCount = 3; // we need to know this in advance to avoid back tracking through images
+            int outputCount = 4; // we need to know this in advance to avoid back tracking through images
 
             // args[0] - Learning Rate
             // args[1] - Alpha in Bipolar Linear Function
@@ -29,7 +29,7 @@ namespace MovieClassifier
             Network net = new Network(double.Parse(args[0].Replace(".",",")), double.Parse(args[1].Replace(".",",")), 
                 double.Parse(args[2].Replace(".",",")), double.Parse(args[3].Replace(".",",")), 
                 imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
-            //Network net = Network.LoadNetworkFromFile("weights.txt");
+            //Network net = Network.LoadNetworkFromFile("record_weights_MeanErrorTest_0,46");
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
@@ -37,7 +37,7 @@ namespace MovieClassifier
 
             //net.RandomizeWeights();
             ClassifyMovies(finalData, net);
-            net.Train(finalData, 100);
+            net.Train(finalData, 50);
             ClassifyMovies(finalData, net);
         }
 

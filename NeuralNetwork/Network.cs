@@ -102,7 +102,6 @@ namespace NeuralNetwork
         /// <param name="epochCount"></param>
         public void Train(double[][][] data, int epochCount)
         {
-            SaveNetworkToFile("weights.txt");
             double[][] inputs = data[0], expectedOutputs = data[1];
             double[][] testInputs = data[2], testOutputs = data[3];
 
