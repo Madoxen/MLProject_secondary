@@ -4,6 +4,7 @@ using System.IO;
 using DataPreparer;
 using NeuralNetwork;
 using System.Linq;
+using System.Globalization;
 
 namespace MovieClassifier
 {
@@ -26,8 +27,8 @@ namespace MovieClassifier
             int[] hiddenNeurons = new int[args.Length - 4];
             for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            Network net = new Network(double.Parse(args[0].Replace(".",",")), double.Parse(args[1].Replace(".",",")), 
-                double.Parse(args[2].Replace(".",",")), double.Parse(args[3].Replace(".",",")), 
+            Network net = new Network(ConvertArg(args[0]), ConvertArg(args[1]), 
+                ConvertArg(args[2]), ConvertArg(args[3]), 
                 imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
             //Network net = Network.LoadNetworkFromFile("record_weights_MeanErrorTest_0,46");
             net.testStrategy = new HighestHitTest(net);
@@ -51,6 +52,12 @@ namespace MovieClassifier
                 if (outputs.IndexOf(outputs.Max()) == finalData[3][i].ToList().IndexOf(1)) correct += 1;
             }
             Console.WriteLine($" Correct ones: {correct}/{finalData[2].Length} ");
+        }
+
+
+        private static double ConvertArg(string d)
+        {
+            return Double.Parse(d.Replace(',', '.'), CultureInfo.InvariantCulture);
         }
     }
 }
