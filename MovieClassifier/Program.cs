@@ -27,10 +27,10 @@ namespace MovieClassifier
             int[] hiddenNeurons = new int[args.Length - 4];
             for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            Network net = new Network(ConvertArg(args[0]), ConvertArg(args[1]), 
-                ConvertArg(args[2]), ConvertArg(args[3]), 
-                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
-            //Network net = Network.LoadNetworkFromFile("record_weights_MeanErrorTest_0,46");
+           // Network net = new Network(ConvertUtil.ConvertArg(args[0]), ConvertUtil.ConvertArg(args[1]), 
+           //     ConvertUtil.ConvertArg(args[2]), ConvertUtil.ConvertArg(args[3]), 
+//imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
+            Network net = Network.LoadNetworkFromFile("record_weights_HighestHitTest_0,74");
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
@@ -38,7 +38,7 @@ namespace MovieClassifier
 
             //net.RandomizeWeights();
             ClassifyMovies(finalData, net);
-            net.Train(finalData, 50);
+            net.Train(finalData, 2);
             ClassifyMovies(finalData, net);
         }
 
@@ -55,9 +55,6 @@ namespace MovieClassifier
         }
 
 
-        private static double ConvertArg(string d)
-        {
-            return Double.Parse(d.Replace(',', '.'), CultureInfo.InvariantCulture);
-        }
+
     }
 }

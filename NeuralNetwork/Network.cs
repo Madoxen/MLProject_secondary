@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace NeuralNetwork
@@ -168,7 +169,7 @@ namespace NeuralNetwork
             for (int i = 1; i < Layers.Count; i++)
                 foreach (Neuron neuron in Layers[i].Neurons)
                     foreach (Synapse synapse in neuron.Inputs)
-                        tmp.Add(synapse.Weight.ToString());
+                        tmp.Add(synapse.Weight.ToString(CultureInfo.InvariantCulture));
             
             string build = $"{LearningRate.ToString()} {Functions.Alpha.ToString()} {Synapse.MinInitWeight} {Synapse.MaxInitWeight}";
             foreach (Layer layer in Layers) build += " " + layer.Neurons.Count.ToString();
@@ -188,8 +189,8 @@ namespace NeuralNetwork
             for (int i = 5; i < firstLine.Length - 1; i++) 
                 hiddenLayerSizes.Add(Convert.ToInt32(firstLine[i]));
             
-            Network net = new Network(Double.Parse(firstLine[0]), Double.Parse(firstLine[1]), 
-                Double.Parse(firstLine[2]), Double.Parse(firstLine[3]), Convert.ToInt32(firstLine[4]), 
+            Network net = new Network(ConvertUtil.ConvertArg(firstLine[0]), ConvertUtil.ConvertArg(firstLine[1]), 
+                ConvertUtil.ConvertArg(firstLine[2]), ConvertUtil.ConvertArg(firstLine[3]), Convert.ToInt32(firstLine[4]), 
                 hiddenLayerSizes.ToArray(), Convert.ToInt32(firstLine[firstLine.Length - 1]));
 
             Console.WriteLine(" Loading weights...");
@@ -203,7 +204,7 @@ namespace NeuralNetwork
                     for (int j = 1; j < net.Layers.Count; j++)
                         foreach (Neuron neuron in net.Layers[j].Neurons)
                             foreach (Synapse synapse in neuron.Inputs)
-                                synapse.Weight = Double.Parse(lines[i++]);
+                                synapse.Weight = ConvertUtil.ConvertArg(lines[i++]);
                 }
                 catch (Exception) { Console.WriteLine(" Incorrect input file."); }
             }
