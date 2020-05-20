@@ -125,7 +125,7 @@ namespace NeuralNetwork
                     if (testStrategy.CheckHalt() && TestHaltEnabled == true)
                         break;
                     if (testStrategy.CheckRecord() && RecordSaveEnabled == true)
-                        SaveNetworkToFile(@"record_weights" + "_" + testStrategy.GetType().Name.ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString());
+                        SaveNetworkToFile(@"record_weights" + "_" + testStrategy.GetType().Name.ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString() + ".txt");
                 }
             }
         }
@@ -182,7 +182,6 @@ namespace NeuralNetwork
         // (one per line)
         public static Network LoadNetworkFromFile(string path)
         {
-            // VALIDATION REQUIRED!
             string[] lines = File.ReadAllLines(path);
             string[] firstLine = lines[0].Split();
             List<int> hiddenLayerSizes = new List<int>();
