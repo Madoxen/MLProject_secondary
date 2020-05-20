@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using DataPreparer;
 using NeuralNetwork;
 
@@ -21,12 +22,13 @@ namespace MovieClassifier
             List<double[]> expectedOutputData = new List<double[]>();
             List<double[]> testInputData = new List<double[]>();
             List<double[]> testOutputData = new List<double[]>();
+            List<string> uniqueLabels = new List<string>();
 
             { //Ensure that ImageLearningData[] will be disposed after scope exit
                 ImageLearningData[] data = ImageDataPreparer.PrepareImages("Resources", imageWidth, imageHeight);
                 //Pack data into double Data table
 
-                List<string> uniqueLabels = new List<string>();
+
                 for (int i = 0; i < data.Length; i++)
                 {
                     int labelIndex = uniqueLabels.IndexOf(data[i].label);
@@ -80,6 +82,10 @@ namespace MovieClassifier
             testInputData.Clear();
             finalData[3] = testOutputData.ToArray();
             testOutputData.Clear();
+
+            //Output labels
+            File.WriteAllLines("labels.txt", uniqueLabels);
+
             return finalData;
         }
 
