@@ -4,7 +4,6 @@ using System.IO;
 using DataPreparer;
 using NeuralNetwork;
 using System.Linq;
-using System.Globalization;
 
 namespace MovieClassifier
 {
@@ -24,13 +23,13 @@ namespace MovieClassifier
             // args[2] - Minimum Init Weight
             // args[3] - Maximum Init Weight
             // args[4+] - Hidden Neurons
-            int[] hiddenNeurons = new int[args.Length - 4];
-            for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
+            //int[] hiddenNeurons = new int[args.Length - 4];
+            //for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            Network net = new Network(ConvertUtil.ConvertArg(args[0]), ConvertUtil.ConvertArg(args[1]), 
-                ConvertUtil.ConvertArg(args[2]), ConvertUtil.ConvertArg(args[3]), 
-                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
-            //Network net = Network.LoadNetworkFromFile("record_weights_HighestHitTest_0,74");
+		//Network net = new Network(double.Parse(args[0]), double.Parse(args[1]), 
+                //double.Parse(args[2]), double.Parse(args[3]), 
+                //imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
+            	Network net = Network.LoadNetworkFromFile(args[0]);
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
@@ -38,7 +37,7 @@ namespace MovieClassifier
 
             //net.RandomizeWeights();
             ClassifyMovies(finalData, net);
-            net.Train(finalData, 2);
+            net.Train(finalData, 50);
             ClassifyMovies(finalData, net);
         }
 
@@ -53,8 +52,5 @@ namespace MovieClassifier
             }
             Console.WriteLine($" Correct ones: {correct}/{finalData[2].Length} ");
         }
-
-
-
     }
 }
