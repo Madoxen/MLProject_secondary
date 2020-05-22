@@ -177,6 +177,7 @@ namespace NeuralNetwork
             File.WriteAllLines(path, tmp);
         }
 
+
         // loading from .txt file where in first line there are: learning rate, alpha, minimum init weight, 
         // maximum init weight and sizes of all layers - all separated by spaces; other lines are synapse weights 
         // (one per line)
@@ -208,6 +209,12 @@ namespace NeuralNetwork
                 catch (Exception) { Console.WriteLine(" Incorrect input file."); }
             }
             return net;
+        }
+
+
+        public int GetLayerSize(int layerIndex)
+        {
+            return Layers[layerIndex].Neurons.Count;
         }
     }
 }
