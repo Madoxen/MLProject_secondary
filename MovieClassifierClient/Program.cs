@@ -6,7 +6,7 @@ namespace MovieClassifierClient
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            
         }
     }
 }
