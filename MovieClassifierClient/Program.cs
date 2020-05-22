@@ -7,6 +7,11 @@ namespace MovieClassifierClient
         static void Main(string[] args)
         {
             
+
+
+
+
+            
         }
     }
 }
