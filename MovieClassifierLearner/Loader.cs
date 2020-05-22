@@ -4,7 +4,7 @@ using System.IO;
 using DataPreparer;
 using NeuralNetwork;
 
-namespace MovieClassifier
+namespace MovieClassifierLearner
 {
 
     public static class Loader

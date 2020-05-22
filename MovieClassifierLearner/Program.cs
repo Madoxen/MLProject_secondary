@@ -6,7 +6,7 @@ using NeuralNetwork;
 using System.Linq;
 using System.Globalization;
 
-namespace MovieClassifier
+namespace MovieClassifierLearner
 {
     class Program
     {
