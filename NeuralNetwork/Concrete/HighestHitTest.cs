@@ -7,20 +7,14 @@ namespace NeuralNetwork
     {
         private Network network;
         private double maximumPercentageHalt;
-        public double MinDelta
-        {
-            get { return maximumPercentageHalt; }
-            set { maximumPercentageHalt = value; }
-        }
-
         private double recentPercentage;
         public double CurrentRecord { get; private set; }
 
 
-        public HighestHitTest(Network network, double minDelta = 0.001)
+        public HighestHitTest(Network network, double maximumPercentageHalt = 100)
         {
             this.network = network;
-            this.maximumPercentageHalt = minDelta;
+            this.maximumPercentageHalt = maximumPercentageHalt;
         }
 
         public double Test(double[][] inputs, double[][] expectedOutputs)
