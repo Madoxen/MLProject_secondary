@@ -11,7 +11,7 @@ namespace DataPreparer
     {
 
 
-        public static byte[] LoadImage(string path, int targetWidth, int targetHeight)
+        public static byte[] LoadImageRaw(string path, int targetWidth, int targetHeight)
         {
             int paddingRatio = 12;
             //Extract data
@@ -84,7 +84,7 @@ namespace DataPreparer
             string[] tokens = fileName.Split("_");
             string label = tokens[0];
             int number = Convert.ToInt32(tokens[1]);
-            byte[] raw = LoadImage(path, targetWidth, targetHeight);
+            byte[] raw = LoadImageRaw(path, targetWidth, targetHeight);
 
             if(raw == null)
                 return new ImageLearningData(0,0,null,"",0);

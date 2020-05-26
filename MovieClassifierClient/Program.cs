@@ -63,13 +63,18 @@ namespace MovieClassifierClient
             List<double> output = net.GetOutput();
             int predictedIndex = output.MaxAt();
 
-            Console.WriteLine(" Predicted movie: " + labels[predictedIndex] + " with " + Math.Round(output[predictedIndex]*100,5) + "% positiveness");
+            Console.WriteLine(" Predicted movie: " + labels[predictedIndex] + " with " + Math.Round(output[predictedIndex] * 100, 5) + "% positiveness");
         }
 
         private static double[] LoadImage(string path, int targetWidth, int targetHeight)
         {
             double[] data = new double[targetWidth * targetHeight * 3];
-            DataPreparer.ImageDataPreparer.LoadImage(path, targetWidth, targetHeight).CopyTo(data, 0);
+            byte[] raw = DataPreparer.ImageDataPreparer.LoadImageRaw(path, targetWidth, targetHeight);
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] = ((double)raw[i] / 255.0);
+            }
+
             return data;
         }
     }
