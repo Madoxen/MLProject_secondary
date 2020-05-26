@@ -72,7 +72,7 @@ namespace MovieClassifierClient
         private static double[] LoadImage(string path, int targetWidth, int targetHeight)
         {
             double[] data = new double[targetWidth * targetHeight * 3];
-            DataPreparer.ImageDataPreparer.PrepareImage(path, targetWidth, targetHeight).data.CopyTo(data, 0);
+            DataPreparer.ImageDataPreparer.LoadImage(path, targetWidth, targetHeight).CopyTo(data, 0);
             return data;
         }
 

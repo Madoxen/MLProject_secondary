@@ -11,13 +11,8 @@ namespace DataPreparer
     {
 
 
-        ///<summary>
-        ///Prepares one image
-        ///Uses file name as a label, label search terminates at '_' after '_' signifies sample number
-        ///</summary>
-        public static ImageLearningData PrepareImage(string path, int targetWidth, int targetHeight)
+        public static byte[] LoadImage(string path, int targetWidth, int targetHeight)
         {
-
             int paddingRatio = 12;
             //Extract data
             Bitmap original = new Bitmap(path);
@@ -25,54 +20,76 @@ namespace DataPreparer
 
             //Perform cropping and resize
             Bitmap croppedToRatio = CropToRatio(original, 2.0);
-
             Rectangle rect = new Rectangle(croppedToRatio.Width / paddingRatio,
-   croppedToRatio.Height / paddingRatio,
-   croppedToRatio.Width - (2 * (croppedToRatio.Width / paddingRatio)),
-   croppedToRatio.Height - (2 * (croppedToRatio.Height / paddingRatio)));
+            croppedToRatio.Height / paddingRatio,
+            croppedToRatio.Width - (2 * (croppedToRatio.Width / paddingRatio)),
+            croppedToRatio.Height - (2 * (croppedToRatio.Height / paddingRatio)));
 
 
             Bitmap cropped = CropBitmap(croppedToRatio, rect);
             Bitmap resized = new Bitmap(cropped, new Size(targetWidth, targetHeight));
-            BitmapData data = resized.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-            int depth = 3; //bytes per pixel
-            byte[] buffer = new byte[data.Width * data.Height * depth];
-
-            //copy pixels to buffer
-            unsafe
+            try
             {
-                int Height = resized.Height;
-                int Width = resized.Width;
-                int pos = 0;
-                byte* ptr = (byte*)data.Scan0;
-                for (int y = 0; y < Height; y++)
-                {
-                    byte* ptr2 = ptr;
-                    for (int x = 0; x < Width; x++)
-                    {
-                        buffer[pos++] = *(ptr2++); //B
-                        buffer[pos++] = *(ptr2++); //G
-                        buffer[pos++] = *(ptr2++); //R
-                    }
-                    ptr += data.Stride;
-                }
-            }
+                BitmapData data = resized.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                int depth = 3; //bytes per pixel
+                byte[] buffer = new byte[data.Width * data.Height * depth];
 
-            resized.UnlockBits(data);
+                //copy pixels to buffer
+                unsafe
+                {
+                    int Height = resized.Height;
+                    int Width = resized.Width;
+                    int pos = 0;
+                    byte* ptr = (byte*)data.Scan0;
+                    for (int y = 0; y < Height; y++)
+                    {
+                        byte* ptr2 = ptr;
+                        for (int x = 0; x < Width; x++)
+                        {
+                            buffer[pos++] = *(ptr2++); //B
+                            buffer[pos++] = *(ptr2++); //G
+                            buffer[pos++] = *(ptr2++); //R
+                        }
+                        ptr += data.Stride;
+                    }
+                }
+
+                resized.UnlockBits(data);
+                return buffer;
+            }
+            catch (Exception) {
+                return null;
+             }
+            finally
+            {
+                //Free GDI handles
+                resized.Dispose();
+                croppedToRatio.Dispose();
+                cropped.Dispose();
+                original.Dispose();
+            }
+            
+        }
+
+
+        ///<summary>
+        ///Prepares one image
+        ///Uses file name as a label, label search terminates at '_' after '_' signifies sample number
+        ///</summary>
+        public static ImageLearningData PrepareImage(string path, int targetWidth, int targetHeight)
+        {
 
             //Extract label
             string fileName = Path.GetFileNameWithoutExtension(path);
             string[] tokens = fileName.Split("_");
             string label = tokens[0];
             int number = Convert.ToInt32(tokens[1]);
+            byte[] raw = LoadImage(path, targetWidth, targetHeight);
 
-            //Free GDI handles
-            resized.Dispose();
-            croppedToRatio.Dispose();
-            cropped.Dispose();
-            original.Dispose();
+            if(raw == null)
+                return new ImageLearningData(0,0,null,"",0);
 
-            return new ImageLearningData(data.Width, data.Height, buffer, label, number);
+            return new ImageLearningData(targetWidth, targetHeight, raw, label, number);
         }
 
 
