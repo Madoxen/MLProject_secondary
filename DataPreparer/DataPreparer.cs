@@ -102,6 +102,7 @@ namespace DataPreparer
         public static ImageLearningData[] PrepareImages(string path, int width, int height)
         {
             string[] files = Directory.GetFiles(path, "*.png");
+            Array.Sort(files);
             ImageLearningData[] result = new ImageLearningData[files.Length];
             for (int i = 0; i < files.Length; i++)
             {

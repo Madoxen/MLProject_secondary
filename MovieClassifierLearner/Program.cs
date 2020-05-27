@@ -24,13 +24,13 @@ namespace MovieClassifierLearner
             // args[2] - Minimum Init Weight
             // args[3] - Maximum Init Weight
             // args[4+] - Hidden Neurons
-            int[] hiddenNeurons = new int[args.Length - 4];
-            for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
+//            int[] hiddenNeurons = new int[args.Length - 4];
+     //       for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
 
-            Network net = new Network(ConvertUtil.ConvertArg(args[0]), ConvertUtil.ConvertArg(args[1]), 
+            /*Network net = new Network(ConvertUtil.ConvertArg(args[0]), ConvertUtil.ConvertArg(args[1]), 
                 ConvertUtil.ConvertArg(args[2]), ConvertUtil.ConvertArg(args[3]), 
-                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
-            //Network net = Network.LoadNetworkFromFile("record_weights_HighestHitTest_0,74");
+                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);*/
+            Network net = Network.LoadNetworkFromFile("model.txt");
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
