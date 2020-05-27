@@ -2,6 +2,7 @@
 using System.IO;
 using NeuralNetwork;
 using DataPreparer;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace MovieClassifierClient
@@ -61,9 +62,13 @@ namespace MovieClassifierClient
             double[] imageData = LoadImage(imagePath, 50, 25);
             net.PushInputValues(imageData);
             List<double> output = net.GetOutput();
-            int predictedIndex = output.MaxAt();
 
-            Console.WriteLine(" Predicted movie: " + labels[predictedIndex] + " with " + Math.Round(output[predictedIndex] * 100, 5) + "% positiveness");
+            output = output.OrderByDescending(x=>x).ToList();
+            for(int i = 0; i < 2; i++)
+            {
+                Console.WriteLine(" Predicted movie: " + labels[i] + " with " + Math.Round(output[i] * 100, 5) + "% positiveness");
+            }
+            
         }
 
         private static double[] LoadImage(string path, int targetWidth, int targetHeight)
