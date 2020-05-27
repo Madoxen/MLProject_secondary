@@ -17,7 +17,7 @@ namespace MovieClassifierLearner
             int imageHeight = 25;
             int imageDepth = 3; //number of colors
 
-            int outputCount = 5; // we need to know this in advance to avoid back tracking through images
+            int outputCount = 6; // we need to know this in advance to avoid back tracking through images
 
             // args[0] - Learning Rate
             // args[1] - Alpha in Bipolar Linear Function

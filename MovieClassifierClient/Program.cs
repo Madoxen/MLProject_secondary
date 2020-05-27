@@ -74,7 +74,7 @@ namespace MovieClassifierClient
 
 
             records = records.OrderByDescending(x=>x.val).ToList();
-            for(int i = 0; i < 2; i++)
+            for(int i = 0; i < records.Count; i++)
             {
                 Console.WriteLine(" Predicted movie: " + records[i].label + " with " + Math.Round(records[i].val * 100, 5) + "% positiveness");
             }
