@@ -28,7 +28,6 @@ namespace MovieClassifierLearner
                 ImageLearningData[] data = ImageDataPreparer.PrepareImages("Resources", imageWidth, imageHeight);
                 //Pack data into double Data table
 
-
                 for (int i = 0; i < data.Length; i++)
                 {
                     int labelIndex = uniqueLabels.IndexOf(data[i].label);
