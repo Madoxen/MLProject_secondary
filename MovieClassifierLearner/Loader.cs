@@ -9,7 +9,7 @@ namespace MovieClassifierLearner
 
     public static class Loader
     {
-        public static double[][][] Load(string path, int outputCount, int imageWidth, int imageHeight)
+        public static double[][][] Load(string path, int outputCount, int imageWidth, int imageHeight, string labelFilePath="")
         {
             /*data:
             [0] -> Input Data to be evaluated
@@ -24,7 +24,14 @@ namespace MovieClassifierLearner
             List<double[]> testOutputData = new List<double[]>();
             List<string> uniqueLabels = new List<string>();
 
-            { //Ensure that ImageLearningData[] will be disposed after scope exit
+            if(labelFilePath != "")
+            {
+                string[] labels = File.ReadAllLines(labelFilePath);
+                uniqueLabels = labels.ToList();
+            }
+            
+            {
+                //Ensure that ImageLearningData[] will be disposed after scope exit
                 ImageLearningData[] data = ImageDataPreparer.PrepareImages("Resources", imageWidth, imageHeight);
                 //Pack data into double Data table
 

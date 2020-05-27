@@ -34,7 +34,7 @@ namespace MovieClassifierLearner
             net.testStrategy = new HighestHitTest(net);
 
             Console.WriteLine(" Loading data...");
-            double[][][] finalData = Loader.Load("Resources", outputCount, imageWidth, imageHeight);
+            double[][][] finalData = Loader.Load("Resources", outputCount, imageWidth, imageHeight, "labels.txt");
 
             //net.RandomizeWeights();
             ClassifyMovies(finalData, net);
