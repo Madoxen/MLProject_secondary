@@ -1,5 +1,6 @@
-Indiana Jones
-The Lego Movie
-Shark Tale
-Madagascar
-Loving Vincent
+IndianaJones
+shrek2
+Lego
+sharkTale
+madagascar
+LovingVincent
