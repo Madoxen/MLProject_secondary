@@ -62,11 +62,21 @@ namespace MovieClassifierClient
             double[] imageData = LoadImage(imagePath, 50, 25);
             net.PushInputValues(imageData);
             List<double> output = net.GetOutput();
+            List<Record> records = new List<Record>();
+            for(int i = 0; i < output.Count; i++)
+            {
+                Record r = new Record();
+                r.label = labels[i];
+                r.val = output[i];
+                records.Add(r);
+            }
 
-            output = output.OrderByDescending(x=>x).ToList();
+
+
+            records = records.OrderByDescending(x=>x.val).ToList();
             for(int i = 0; i < 2; i++)
             {
-                Console.WriteLine(" Predicted movie: " + labels[i] + " with " + Math.Round(output[i] * 100, 5) + "% positiveness");
+                Console.WriteLine(" Predicted movie: " + records[i].label + " with " + Math.Round(records[i].val * 100, 5) + "% positiveness");
             }
             
         }
@@ -81,6 +91,12 @@ namespace MovieClassifierClient
             }
 
             return data;
+        }
+
+        private class Record
+        {
+            public string label;
+            public double val;
         }
     }
 }
