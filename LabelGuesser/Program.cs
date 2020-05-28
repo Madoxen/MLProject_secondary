@@ -18,7 +18,7 @@ namespace LabelGuesser
         static void Main(string[] args)
         {
 
-            string resourcesPath = "../MovieClassifierLearner/Resources";
+            string resourcesPath = "../MovieClassifierLearner/MLSecondaryDataSet";
             string modelPath = "model.txt";
 
 
