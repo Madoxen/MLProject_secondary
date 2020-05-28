@@ -1,0 +1,2151 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[]{algorithm2e}
+\SetKw{KwBy}{by}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{mathtools}
+
+
+\usepackage{pgfplots}
+\pgfplotsset{width=13cm,compat=1.9}
+\usepgfplotslibrary{external}
+
+\lstloadlanguages{% Check docs for further languages ...
+	C,
+	C++,
+	csh,
+	Java
+}
+
+\definecolor{red}{rgb}{0.6,0,0} % for strings
+\definecolor{blue}{rgb}{0,0,0.6}
+\definecolor{green}{rgb}{0,0.8,0}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\lstset{
+	language=csh,
+	basicstyle=\footnotesize\ttfamily,
+	numbers=left,
+	numberstyle=\tiny,
+	numbersep=5pt,
+	tabsize=2,
+	extendedchars=true,
+	breaklines=true,
+	frame=b,
+	stringstyle=\color{blue}\ttfamily,
+	showspaces=false,
+	showtabs=false,
+	xleftmargin=17pt,
+	framexleftmargin=17pt,
+	framexrightmargin=5pt,
+	framexbottommargin=4pt,
+	commentstyle=\color{green},
+	morecomment=[l]{//}, %use comment-line-style!
+	morecomment=[s]{/*}{*/}, %for multiline comments
+	showstringspaces=false,
+	morekeywords={ abstract, event, new, struct,
+		as, explicit, null, switch,
+		base, extern, object, this,
+		bool, false, operator, throw,
+		break, finally, out, true,
+		byte, fixed, override, try,
+		case, float, params, typeof,
+		catch, for, private, uint,
+		char, foreach, protected, ulong,
+		checked, goto, public, unchecked,
+		class, if, readonly, unsafe,
+		const, implicit, ref, ushort,
+		continue, in, return, using,
+		decimal, int, sbyte, virtual,
+		default, interface, sealed, volatile,
+		delegate, internal, short, void,
+		do, is, sizeof, while,
+		double, lock, stackalloc,
+		else, long, static,
+		enum, namespace, string},
+	keywordstyle=\color{cyan},
+	identifierstyle=\color{red},
+}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{blue}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
+
+\addtolength{\hoffset}{-1.5cm}
+\addtolength{\marginparwidth}{-1.5cm}
+\addtolength{\textwidth}{3cm}
+\addtolength{\voffset}{-1cm}
+\addtolength{\textheight}{2.5cm}
+\setlength{\topmargin}{0cm}
+\setlength{\headheight}{0cm}
+
+\begin{document}
+	
+	\title{Systemy Sztucznej Inteligencji\\\small{dokumentacja projektu Movie Classifier}}
+	\author{
+	Chłąd Paweł\\
+	Grupa 2D
+	\and
+	Matula Kamil\\
+	Grupa 2D
+	\and
+	Meller Bartłomiej\\
+	Grupa 2D}
+	\date{\today}
+
+	\maketitle
+	\newpage
+	\section*{Część I}
+	\subsection*{Opis programu}
+	\hspace{20pt} Movie Classifier to sieć neuronowa służąca do klasyfikacji kadrów z danej puli filmów. Aplikacja jest podzielona na dwie części, a) Program uczący oraz b) Program kliencki.
+	\subsection*{Instrukcja obsługi}
+	%Jak uruchomić program, jak wyglądają dane. Mile widziana wizualizacja gry, wyników z punku widzenia aplikacji itd.
+	
+	\hspace{20pt} Aby uruchomić program uczący należy przejść do folderu \lstinline{MovieClassifierLearner} oraz uruchomić program za pomocą \lstinline{dotnet run arg1 arg2 arg3 itp} lub uruchomić go bezpośrednio z pliku wykonywalnego \footnote{Ze względu na ilość i rozmiary plików, które są tworzone podczas kompilacji, w repozytorium nie umieściliśmy plików wykonywalnych}. 
+
+	Aby uruchomić program kliencki należy przejść do folderu  \lstinline{MovieClassifierClient} oraz uruchomić program za pomocą \lstinline{dotnet run path_to_image} lub uruchomić go bezpośrednio z pliku wykonywalnego. (Gdzie path\_to\_image to ścieżka do zdjęcia/klatki z filmu)
+	
+	
+	\subsubsection*{Argumenty wejściowe}
+	\begin{itemize}
+	    \item Program uczący
+	    \begin{itemize}
+	        \item args[0] - Współczynnik uczenia (LR)
+            \item args[1] - Alpha w Bipolarnej Linearnej Funkcji
+            \item args[2] - Minimalna wartość wagi
+            \item args[3] - Maksymalna wartość wagi
+            \item args[4+] - Wielkość ukrytych warstw (w neuronach)
+	    \end{itemize}
+	    \item Klient
+	    \begin{itemize}
+	        \item args[0] - Ścieżka do klatki z filmu
+	        \item args[1] - (Opcjonalny) - ścieżka do modelu
+	        \item args[2] - (Opcjonalny) - ścieżka do etykiet
+	    \end{itemize}
+	\end{itemize}
+	
+	
+	
+	\subsection*{Dodatkowe informacje}
+    Projekt został skompilowany za pomocą .NET Core 3.1 
+	\newpage
+	\section*{Część II}
+    \subsection*{Opis działania sieci neuronowej} 
+    %Tutaj uwzględniamy część matematyczną. Opisujemy całą teorię np.: dla zadania związanego z sieciami neuronowymi - opisujemy całą budowę, algorytm uczenia i wszystkie wzory. Dla zadania związanego z kombinatoryką opisujemy całą teorię kombinatoryczną potrzebną do zrozumienia zadania (mile widziany przykład obliczeniowy).
+	\hspace{20pt} Jak zostało wcześniej wspomniane program opiera się na sztucznej sieci neuronowej (SSN), czyli matematycznym modelu sieci nerwowej działającej w mózgu. Podobnie jak ludzka sieć neuronowa, SSN zbudowana jest z neuronów ułożonych w warstwy. Każda komórka nerwowa danej warstwy połączona jest ze wszystkimi komórkami warstwy poprzedniej i warstwy następnej za pomocą synaps posiadających pewne losowo zainicjowane wagi w postaci liczb. Są one modyfikowane w procesie uczenia sieci neuronowej.
+	
+	\vspace{5pt}
+	Pierwszą warstwę sieci, odpowiedzialną za przyjmowanie danych wejściowych, nazywamy warstwą wejściową. Analogicznie ostatnia warstwa sieci to warstwa wyjściowa, odpowiadająca za zwracanie wyniku. Pomiędzy nimi mogą (lecz nie muszą) znajdować się tzw. warstwy ukryte. Zadaniem projektanta sieci neuronowej jest znalezienie optymalnej ilości i wielkości tych warstw, dzięki czemu nauczanie będzie przebiegało efektywnie. Z kolei ilość neuronów na warstwach skrajnych zależy od tego, ile cech posiada obiekt wejściowy oraz do ilu klas można go zaklasyfikować na wyjściu - w przypadku tego projektu jest to 3750 neuronów wejściowych (przetwarzane obrazy mają wymiary 50x25x3) oraz 6 neuronów wyjściowych (do tylu różnych filmów może zostać zakwalifikowany analizowany kadr).
+	
+	\vspace{5pt}
+	Każdy z neuronów przyjmuje pewną wartość na wejściu, a następnie przetwarza ją dzięki funkcji aktywacji. Sygnał wejściowy i-tego neuronu k-tej warstwy można opisać równaniem:
+	
+	\begin{equation*}
+	    s^k_i = \sum_{j=1}^{n}w^k_{ij} y^{k-1}_{j} + b,
+	\end{equation*}
+	
+	\noindent gdzie $w^k_{ij}$ - waga synapsy pomiędzy i-tym neuronem k-tej warstwy a j-tym neuronem warstwy poprzedniej, $y^{k-1}_{j}$ - wartość sygnału wyjściowego j-tego neuronu warstwy poprzedniej, $b$ - zakłócenia sieci (tzw. bias). Najczęściej we wzorze tym nie uwzględnia się ostatniego czynnika (zakłada się, że sieć nie posiada zakłóceń tj. b = 0). Z kolei sygnał wyjściowy i-tego neuronu to:
+	
+	\begin{equation*}
+	    y^k_i = f(s^k_i) = f(\sum_{j=1}^{n}w^k_{ij} y^{k-1}_{j} + b).
+	\end{equation*}
+	
+	Wyróżniamy wiele funkcji aktywacji, jednak najczęściej wykorzystywaną (i wykorzystaną również w tym projekcie) jest funkcja bipolarna liniowa, której wzór wygląda następująco:
+	
+	\begin{equation*}
+	    f(s^k_i) = \frac{2}{1 + e^{-\alpha s^k_i}} - 1 = \frac{1 - e^{-\alpha s^k_i}}{1 + e^{-\alpha s^k_i}}
+	\end{equation*}
+	
+	\noindent gdzie $\alpha$ jest współczynnikiem korygującym rozpiętość funkcji aktywacji w przestrzeni decyzyjnej. Jej wykres zamieszczono na następnej stronie.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines = middle,
+    xmin = -10, xmax = 10,
+    ymin = -1, ymax = 1,
+    legend pos=south east
+]
+
+\addplot [
+    domain=-10:10,
+    samples=100, 
+    color=red,
+]
+{(1 - exp(-0.25 * x))/(1 + exp(-0.25 * x))};
+\addlegendentry{$\alpha = 0.25$}
+
+\addplot [
+    domain=-10:10,
+    samples=100, 
+    color=blue,
+    ]
+    {(1 - exp(-0.5 * x))/(1 + exp(-0.5 * x))};
+\addlegendentry{$\alpha = 0.50$}
+
+\addplot [
+    domain=-10:10,
+    samples=100, 
+    color=green,
+    ]
+    {(1 - exp(-0.75 * x))/(1 + exp(-0.75 * x))};
+\addlegendentry{$\alpha = 0.75$}
+
+\addplot [
+    domain=-10:10,
+    samples=100, 
+    color=yellow,
+    ]
+    {(1 - exp(-x))/(1 + exp(- x))};
+\addlegendentry{$\alpha = 1.00$}
+
+\end{axis}
+\end{tikzpicture}
+\newline Bipolarna liniowa funkcja aktywacji
+\end{center}
+
+    
+    Kiedy sztuczna sieć neuronowa jest już odpowiednio zbudowana, należy ją nauczyć tego, czego od niej oczekujemy. Polega to na modyfikowaniu wag synaps w ściśle określony sposób. Jest wiele metod uczenia z czego część wymaga nauczyciela w postaci zbioru treningowego z danymi wejściowymi i oczekiwanymi danymi wyjściowymi, a część nie - wtedy sieć dostaje tylko dane wejściowe. W przypadku uczenia rozpoznawania obiektów stosuje się metody uczenia z nauczycielem. Jedną z takich strategii jest algorytm wstecznej propagacji. Jej zadaniem jest zminimalizowanie wartości funkcji błędu dla wszystkich elementów zbioru treningowego T, co opisuje wzór:
+    \begin{equation*}
+        B(T) = \sum_{T}\sum_{i=1}^{n}(d_{i} - y_{i})^{2},
+    \end{equation*}
+    gdzie n to wymiar wektora wyjściowego / liczba neuronów wyjściowych, $d_{i}$ to wartość oczekiwana na i-tej pozycji wektora wyjściowego, a $y_{i}$ to wartość uzyskana na i-tej pozycji wektora wyjściowego. Korekcja wag synaps wejściowych poszczególnych neuronów zaczyna się w warstwie wyjściowej oznaczanej literą K i przebiega wstecz przez wszystkie wcześniejsze warstwy aż dotrze do warstwy wejściowej. Równanie korekcji wag wygląda następująco:
+    \begin{equation*}
+        w^k_{ij} = w^k_{ij} + \eta \nabla w^k_{ij},
+    \end{equation*}
+    
+    \noindent gdzie $\eta$ jest współczynnikiem korekcji powszechnie nazywanym ,,Learning Rate'', a $\nabla w^k_{ij}$ to wartość gradientu błędu wagi synapsy opisywana wzorem:
+    \begin{equation*}
+        \nabla w^k_{ij} = \frac{\partial B(T)}{\partial w^k_{ij}} = \frac{1}{2} \cdot \frac{\partial B(T)}{\partial s^k_i} \cdot 2 \cdot \frac{\partial s^k_i}{\partial w^k_{ij}} = 2 \delta^k_i y^{k-1}_j,
+    \end{equation*}
+    
+    \noindent gdzie $\delta^k_i$ to zmiana funkcji błędu dla sygnału wejściowego i-tego neuronu k-tej warstwy, a $y^{k-1}_j$ to sygnał wyjściowy j-tego neuronu warstwy poprzedniej. Wspomniana wartość $\delta$ liczona jest inaczej na warstwie wyjściowej i inaczej na pozostałych. Na K-tej warstwie wynosi:
+    
+    \begin{equation*}
+        \delta^K_i = \frac{1}{2} \cdot \frac{\partial B(T)}{\partial s^k_i} = \frac{1}{2} \cdot \frac{\partial (d^K_{i} - y^K_{i})^2}{\partial s^k_i} = f'(s^K_i) \cdot (d^K_{i} - y^K_{i}),
+    \end{equation*}
+    
+    \noindent gdzie $f'(s^K_i)$ to pochodna funkcja aktywacji na K-tej warstwie (wyjściowej). Wartość zmiany funkcji błędu na pozostałych warstwach jest zależna od wartości uzyskanej na warstwie następnej i jest równa:
+    
+    \begin{equation*}
+        \delta^k_i = \frac{1}{2} \cdot \frac{\partial B(T)}{\partial s^k_i} = \frac{1}{2} \cdot \sum_{j=1}^{N_{k+1}} \frac{\partial B(T)}{\partial s_j^{k+1}} \frac{\partial s_j^{k+1}}{\partial s^k_i} = f'(s^k_i) \sum_{j=1}^{N_{k+1}} \delta^{k+1}_j w^{k+1}_{ij},
+    \end{equation*}
+    
+    \noindent gdzie $N_{k+1}$ to liczba neuronów warstwy następnej.
+	
+\newpage
+	\subsection*{Algorytm}
+	%Tutaj opisujemy rozwiązanie zadania. Dla przedmiotu programowanie będzie to wykorzystanie matematyki z poprzedniego zadania itd. Dla SSI będzie to ogólne działanie przetwarzania danych w oparciu o modele matematyczne z poprzedniego zadania. 
+	
+\subsubsection*{Uczenie sieci}
+\begin{algorithm}[H]
+\KwData{ilość iteracji - $EpochsCount$, dane wejściowe zbioru treningowego - $Inputs$, \\ oczekiwane dane wyjściowe zbioru treningowego - $ExpectedOutputs$}
+\KwResult{Większa dokładność sieci}
+$L := $ ilość warstw sieci neuronowej\;
+$Deltas := $ pusta tablica poszarpana o L wierszach i tylu kolumnach w danym wierszu, \\ ile neuronów ma dana warstwa; będzie przetrzymywać wartości $\delta$\;
+\For{$i = 0$ \KwTo $EpochsCount$}{
+\For{$j = 0$ \KwTo wielkość zbioru treningowego}{
+Wprowadź j-ty wektor wejściowy zbioru treningowego ($Inputs[j]$) \\ do synaps wchodzących neuronów pierwszej warstwy\;
+\vspace{5pt}
+\For{$k = 0$ \KwTo L}{
+Wyznacz $s^k$ na wszystkich neuronach k-tej warstwy, sumując \\ iloczyny wag synaps wchodzących i $y^k$ neuronów warstwy \\ poprzedniej (lub synaps w przypadku pierwszej warstwy)\;
+\vspace{5pt}
+Wyznacz $y^k$ na wszystkich neuronach k-tej warstwy \\ poprzez zastosowanie funkcji aktywacji\;
+}
+\vspace{5pt}
+$Output := $ wektor złożony z wartości wyjściowych ostatniej warstwy\; 
+\For{$n = 0$ \KwTo ilość neuronów wyjściowych}{
+$Deltas[L - 1][n] = (ExpectedOutputs[j][n] - Output[j]) \cdot f'(s^{L-1}_n)$\;
+}
+\vspace{5pt}
+\For{$k = L-2$ \KwTo $0$ \KwBy $-1$}{
+\For{$n = 0$ \KwTo ilość neuronów na k-tej warstwie}{
+$Deltas[k][n] = 0$\;
+\For{$m = 0$ \KwTo ilość neuronów na (k+1)-tej warstwie}{
+$Deltas[k][n] = Deltas[k][n] + Deltas[k+1][m] \cdot w^{k+1}_{mn}$\;
+}
+$Deltas[k][n] = Deltas[k][n] \cdot f'(s^{k}_n)$\;
+}
+}
+\vspace{5pt}
+\For{$k = L-2$ \KwTo $0$ \KwBy $-1$}{
+\For{$n = 0$ \KwTo ilość neuronów na k-tej warstwie}{
+\For{$m = 0$ \KwTo ilość neuronów na (k-1)-tej warstwie}{
+$w^{k}_{nm} = 2 \cdot LR \cdot Deltas[k][n] \cdot y_m^{k-1}$\;
+}
+}
+}
+}        
+}
+\caption{Algorytm trenowania sztucznej sieci neuronowej.}
+\end{algorithm}
+
+Widoczny na poprzedniej stronie algorytm przedstawia pełny proces trenowania sieci neuronowej z wykorzystaniem zbioru treningowego i algorytmu wstecznej propagacji. Przedziały liczbowe, przez które przebiegają zapisane pętle \textbf{for} są jednostronnie domknięte (liczba po \textbf{to} nie jest brana pod uwagę). Pojawiają się też zapisy $LR$, $s^k_i$, $y^k_i$ i $w^{k}_{ij}$ - są to kolejno: wartość współczynnika nauczania (Learning Rate), wartość wejściowa i wartość wyjściowa i-tego neuronu na k-tej warstwie oraz waga synapsy pomiędzy i-tym neuronem k-tej warstwy a j-tym neuronem warstwy poprzedniej. Ponadto $f'(\cdot)$ oznacza wartość pochodnej funkcji aktywacji - dla funkcji bipolarnej liniowej o wzorze $f(x) = \frac{1 - e^{-\alpha x}}{1 + e^{-\alpha x}}$ pochodna wynosi $f'(x) = \frac{2 \alpha e^{-\alpha x}}{(1 + e^{-\alpha x})^2}$.
+
+	\subsection*{Zbiór danych}
+	%Należy pokazać przykładowe dane, które były wykorzystywane podczas uczenia klasyfikatorów.
+	
+    \hspace{15pt} Generowanie datasetu wyglądało następująco. Filmy odtwarzane były na platformie Netflix. Skrypt napisany w języku Python3, poruszając i klikając kursorem myszki, przesuwał film o stałą ilość czasu do przodu. Czekał aż interfejs zniknie, wykonywał i zapisywał zrzut ekranu. W ten sposób powstawało ponad 250 zrzutów na film. Z tak powstałego zbioru danych eliminowane były zrzuty ekranu będące nieczytelnymi oraz zwierające jedynie monolityczny czarny kolor.
+	
+	\par Następnie obrazy zostały wczytane do aplikacji, której zadaniem było ich ustandaryzowanie oraz zmniejszenie. SSN, która została zaakceptowana posiada wektor wejściowy o wielkości 50x25x3 (50x25 pikseli, każdy po 3 kolory BGR). Aplikacja więc zmniejszy obraz do żądanej wielkości. Proces zmniejszania wygląda następująco:
+	\begin{enumerate}
+	    \item Zdjęcie jest przycinane, aby stosunek długości do wysokości zdjęcia był taki sam jak stosunek długości do wysokości oczekiwanego obrazu wejściowego (bieżące AspectRatio: 2) - jest to wymagane, aby proces zmniejszania nie rozciągał zdjęcia, co mogłoby sprawić problemy przy uczeniu.
+	    \item Często klatki z filmów posiadają tzw. letterboxa (czarne paski u góry i na dole, czasami po bokach też). Czarne piksele mogą wpływać na proces uczenia się SSN, więc zdjęcie jest ponownie przycinane; wycinane jest $\frac{1}{12}$ zdjęcia z każdej strony.
+	    \item Obrobioną już klatkę, zmniejszamy do wymiarów 50x25.
+	    \item Klatka zostaje zamieniona na tablicę typu \lstinline{double}.
+	\end{enumerate}
+	\begin{figure}[h!]
+	    \centering
+	    \includegraphics[height=5.5cm]{Lego_150.png}
+	\end{figure}
+	\begin{center}Przykładowy kadr z filmu ,,Lego Przygoda'' \end{center}
+	
+	
+	\subsection*{Implementacja}
+	%Opis, zasada i działanie programu ze względu na podział na pliki, nastepnie	funkcje programu wraz ze szczegółowym opisem działania (np.: formie pseudokodu, czy odniesienia do równania)
+	\subsubsection*{Ogólna struktura}
+    Cały projekt składa się z wielu mniejszych projektów (każdy w swoim osobnym folderze):
+    \begin{itemize}
+        \item DataPreparer - projekt biblioteki do ładowania zdjęć i przerabiania ich na format czytelny dla sieci neuronowej,
+        \item DataPreparerTests - projekt zawierający testy jednostkowe dla biblioteki DataPreparer,
+        \item DataSetGenerator - zestaw skryptów Python, które generują dataset z wybranych filmów platformy Netflix,
+        \item MovieClassifierClient - projekt klienta aplikacji,
+        \item MovieClassifierLearner - projekt programu uczącego,
+        \item NeuralNetwork - projekt biblioteki sieci neuronowej,
+        \item NeuralNetworkTests - projekt testów jednostkowych biblioteki sieci neuronowej.
+    \end{itemize}
+    
+    \subsubsection*{DataPreparer}
+    Biblioteka DataPreparer zawiera dwie klasy:
+    \begin{itemize}
+        \item \lstinline{static DataPreparer} - statyczna klasa zawierająca metody obróbki i ładowania zdjęć,
+        \item \lstinline{struct ImageLearningData} - struktura trzymająca dane o zdjęciu i danych do nauki.
+    \end{itemize}
+    
+    \textbf{DataPreparer} - Metody
+    \begin{itemize}
+        \item \lstinline{ImageLearningData PrepareImage(string path, int imageWidth, int imageHeight)} - odczytuje obraz i zmienia go w obsługiwany format dla aplikacji uczącej
+        \item \lstinline{ImageLearningData[] PrepareImages(string path, int imageWidth, int imageHeight} - odczytuje wszystkie obrazy w podanej ścieżce i zmienia je w obsługiwany format dla aplikacji uczącej
+    \end{itemize}
+    
+    \textbf{ImageLearningData} - Pola i właściwości
+    \begin{itemize}
+        \item \lstinline{ReadOnlyCollection<double> data} - kolekcja zawierająca informacje o obrazie w formacie BGR
+        \item \lstinline{string label} - etykieta (używana przy procesie uczenia)
+        \item \lstinline{int number} - numer próbki
+        \item \lstinline{readonly int width} - szerokość obrazu
+        \item \lstinline{readonly int height} - wysokość obrazu
+    \end{itemize}
+    
+    \pagebreak
+    \subsubsection*{NeuralNetwork}
+    Biblioteka zawiera następujące klasy:
+    \begin{itemize}
+        \item \lstinline{static class ArrayExtensions} - klasa zawierająca metody rozszerzające dla tablic
+        \item \lstinline{class ConvertUtil} - klasa zawierająca metody pomocnicze do konwersji argumentów
+        \item \lstinline{static class Functions} - klasa zawierająca funkcje aktywacji
+        \item \lstinline{class Layer} - klasa reprezentująca warstwę neuronów
+        \item \lstinline{static class ListExtensions} - klasa zawierające metody rozszerzeń dla list
+        \item \lstinline{class Network} - główna klasa biblioteki reprezentująca sieć neuronową
+        \item \lstinline{class Neuron} - klasa reprezentująca neuron
+        \item \lstinline{static class Normalizator} - klasa zawierające metodę normalizacji danych
+        \item \lstinline{static class Shuffler} - klasa zawierająca metodę przetasowywania kolekcji
+        \item \lstinline{class Synapse} - klasa reprezentująca połączenie między neuronami
+        \item \lstinline{interface ITestStrategy} - interfejs strategii testów
+        \item \lstinline{class MeanErrorTest : ITestStrategy} - test sieci: błąd średniokwadratowy
+        \item \lstinline{class HighestHitTest : ITestStrategy} - test sieci: celność
+    \end{itemize}
+        
+    \textbf{ArrayExtensions} - Metody
+    \begin{itemize}
+        \item \lstinline{T[] GetColumn(int index)} - zwraca kolumnę w tablicy
+        \item \lstinline{SetColumn(T[] data, int index)} - ustawia kolumnę w tablicy
+        \item \lstinline{int MaxAt()} - zwraca indeks elementu który posiada najwyższą wartość
+    \end{itemize}
+    
+    \textbf{ConvertUtils} - Metody
+    \begin{itemize}
+        \item \lstinline{static double ConvertArg(string s)} - konwertuje ciąg znaków do typu double, bez względu na aktualny język wątku
+    \end{itemize}
+    
+    \textbf{Functions} - Metody
+    
+        \begin{itemize}
+            \item \lstinline{static double CalculateError(List<double> outputs, int row, double[][] expectedOutputs)} - oblicza błąd średniokwadratowy
+            
+            \item \lstinline{static double InputSumFunction(List<Synapse> Inputs)} - oblicza ważoną sumę dla listy wchodzących połączeń
+            
+            \item \lstinline{static double BipolarLinearFunction(double input)} - oblicza wartość funkcji bipolarnej liniowej (funkcja aktywacji)
+            
+            \item \lstinline{static double  BipolarDifferential(double input)} - oblicza wartość pochodnej funkcji bipolarnej liniowej
+        \end{itemize}
+        
+    \textbf{Functions} - Pola i Właściwości
+    \begin{itemize}
+         \item \lstinline{static double Alpha} - współczynnik dla funkcji bipolarnej liniowej
+    \end{itemize}
+
+    \textbf{Layer} - Metody
+    \begin{itemize}
+        \item \lstinline{Layer(int numberOfNeurons)} - konstruktor - tworzy instancję \lstinline{Layer} wraz z \lstinline{numberOfNeurons} neuronami
+        \item \lstinline{void ConnectLayers(Layer outputLayer)} - łączy neurony wywołującego z neuronami \\ \lstinline{outputLayer} za pomocą instancji \lstinline{Synapse}
+        \item \lstinline{void CalculateOutputOnLayer} - wywołuje \lstinline{CalculateOutput} dla każdego neuronu w tej warstwie
+    \end{itemize}
+    
+    
+    \textbf{Layer} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline{List<Neuron> Neurons} - kolekcja przechowująca instancje klasy \lstinline{Neuron}
+    \end{itemize}
+    
+    
+    \textbf{ListExtensions} - Metody
+    \begin{itemize}
+        \item \lstinline{int MaxAt()} - zwraca indeks elementu który posiada najwyższą wartość
+    \end{itemize}
+    
+    \textbf{Network} - Metody
+    \begin{itemize}
+        \item \lstinline{Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons, int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true, bool recordSaveEnabled = true)} - tworzy nową instancję sieci z następującymi parametrami:
+        \begin{itemize}
+            \item \lstinline{double learningRate} - modyfikator nauczania %jeśli ktoś ma lepszy pomysł jak to nazwać po polsku to zmieńcie XD
+            \item \lstinline{double alpha} - współczynnik alpha funkcji sigmoidalnej bipolarnej
+            \item \lstinline{double minInitWeight} - minimalna waga która może zostać przypisana połączeniu podczas inicjalizacji
+            \item \lstinline{double maxInitWeight} - maksymalna waga która może zostać przypisana połączeniu podczas inicjalizacji
+            \item \lstinline{int numInputNeurons} - ilość neuronów w warstwie 0
+            \item \lstinline{int[] hiddenLayerSizes} - ilość neuronów w poszczególnych warstwach ukrytych
+            \item \lstinline{int numOutputNeurons} - ilość neuronów w ostatniej warstwie
+            \item \lstinline{bool testHaltEnabled} - flaga, jeśli ustawiona na \lstinline{true} to nauczenie automatycznie zatrzyma się gdy test wykryje pogorszenie wyników.
+            \item \lstinline{bool testingEnabled} - flaga, jeśli ustawiona na \lstinline{true} to sieć będzie testowana co epoch
+            \item \lstinline{bool recordSaveEnabled} - flaga, jeśli ustawiona na \lstinline{true} to topologia i parametry sieci zostanie zapisana do pliku po osiągnięciu rekordowego (dotychczas) wyniku
+        \end{itemize}
+        \item \lstinline{void PushInputValues(double[] inputs)} - ustawia wartości synaps wchodzących do warstwy 0
+        \item \lstinline{void PushExpectedValues(double[] values)} - ustawia wartości oczekiwane na ostatniej warstwie (używane w procesie uczenia)
+        \item \lstinline{List<double> GetOutputs()} - oblicza wynik dla tej sieci, z wartości przekazanych przez \lstinline{PushInputValues}
+        \item \lstinline{void Train(double[][][] data, int epochCount)} - uczy sieć używając algorytmu propagacji wstecznej, przez \lstinline{epochCount} epochów. Wartości argumentu data oznaczają:
+        \begin{itemize}
+            \item \lstinline{data[0]} - dane wejściowe
+            \item \lstinline{data[1]} - oczekiwane wartości wyjściowe
+            \item \lstinline{data[2]} - testowe wartości wejściowe
+            \item \lstinline{data[3]} - testowe wartości oczekiwane
+        \end{itemize}
+        Aby proces uczenia odbył się prawidłowo należy upewnić się czy długości \lstinline{data[0]} i \lstinline{data[1]} są równe, analogicznie z \lstinline{data[2]} i \lstinline{data[3]}
+        \item \lstinline{void RandomizeWeights()} - Nadaje losowe wartości wszystkim wagom
+        \item \lstinline{void SaveNetworkToFile(string path)} - Zapisuje sieć do pliku w \lstinline{path}
+        \item \lstinline{static Network LoadNetwrokFromFile(string path)} - Tworzy nową istancję Network i odczytuje z pliku topologie oraz parametry sieci
+        \item \lstinline{int GetLayerSize(int layerIndex)} - zwraca wielkość \lstinline{layerIndex}-tej warstwy 
+    \end{itemize}
+    
+    
+    \textbf{Network} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline{ITestStrategy testStrategy;} - strategia testowania sieci
+        \item \lstinline|bool TestHaltEnabled { get; set; } | %use | because } is matching enclosing -  braces
+        - flaga, jeśli ustawiona na \lstinline{true} to nauczenie automatycznie zatrzyma się gdy test wykryje pogorszenie wyników.
+        \item \lstinline|bool TestingEnabled { get; set; } | - flaga, jeśli ustawiona na \lstinline{true} to sieć będzie testowana co epoch
+        \item \lstinline|bool RecordSaveEnabled { get; set; } | - flaga, jeśli ustawiona na \lstinline{true} to topologia i parametry sieci zostanie zapisana do pliku po osiągnięciu rekordowego (dotychczas) wyniku
+    \end{itemize}
+    
+    \textbf{Neuron} - Metody
+    \begin{itemize}
+        \item \lstinline{Neuron()} - tworzy nową instancję klasy \lstinline{Neuron}
+        \item \lstinline{void AddOutputNeuron(Neuron outputNeuron)} - łączy wywołującego z outputNeuron, nową instancją klasy \lstinline{Synapse}
+        \item \lstinline{void CalculateOutput()} - oblicza wartość neuronu korzystając z wchodzących połączeń i ustawia OutputValue na obliczoną wartość
+        \item \lstinline{void AddInputSynapse()} - dodaje nową instancję klasy \lstinline{Synapse} do listy wchodzących połączeń
+    \end{itemize}
+    
+    \textbf{Neuron} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline|List<Synapse> Inputs { get; set; }| - lista połączeń wchodzących
+        \item \lstinline|List<Synapse> Outputs { get; set; }| - lista połączeń wychodzących
+        \item \lstinline|double InputValue { get; set; }| - ostatnia wartość wchodząca
+        \item \lstinline|double OutputValue { get; set; }| - ostatnia wartość wychodząca 
+    \end{itemize}
+    
+    \textbf{Normalizator} - Metody
+    \begin{itemize}
+        \item \lstinline{static double Normalize(double[] input, double nmin, double nmax)} - normalizuje \lstinline{input} w granicach od \lstinline{nmin} do \lstinline{nmax}
+    \end{itemize}
+    
+    \textbf{Shuffler} - Metody
+    \begin{itemize}
+        \item \lstinline{void Shuffle(T[])} - miesza tablicę
+    \end{itemize}
+    
+    \textbf{Synapse} - Metody
+    \begin{itemize}
+        \item \lstinline{Synapse(Neuron fromNeuron, Neuron toNeuron)} - tworzy synapsę pomiędzy dwoma neuronami
+        \item \lstinline{Synapse(Neuron toNeuron, double data)} - tworzy synapsę bez nadawcy, metoda używana do tworzenia zerowej warstwy
+        \item \lstinline{double GetOutput()} - oblicza wartość na wywołującym połączeniu
+    \end{itemize}
+    
+    \textbf{Synapse} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline|double Weight { get; set; }| - Waga połączenia
+        \item \lstinline|double PushedData { get; set; }| - Aktualna wartość przychodząca
+        \item \lstinline|static int SynapsesCount { get; set; } = 0;| - Informacja o topologii sieci
+        \item \lstinline|static double MaxInitWeight { get; set; }| - Maksymalna wartość wagi, która może być nadana przy inicjalizacji
+        \item \lstinline|static double MinInitWeight { get; set; }| - Minimalna wartość wagi, która może być nadana przy inicjalizacji
+    \end{itemize}
+    
+    
+    \textbf{ITestStrategy}
+    \begin{itemize}
+        \item \lstinline|double CurrentRecord {get;}| - bierzący rekord
+        \item \lstinline|double Test(double[][] input, double[][] expectedOutput)| - metoda testująca sieć
+        \item \lstinline|bool CheckHalt()| - sprawdzenie warunku zatrzymania uczenia
+        \item \lstinline|bool CheckRecord()| - sprawdzenie rekordu
+    \end{itemize}
+    
+    
+    \textbf{HighestHitTest} - Metody
+    \begin{itemize}
+        \item \lstinline{HighestHitTest(Network network, double minDelta = 0.001)} - tworzy nową instancję strategii testu
+        \item \lstinline{double Test(double[][] inputs, double[][] expectedOutputs)} - zwraca wynik testu dla danego zestawu testowego
+        \item \lstinline{bool CheckHalt()} - zwraca \lstinline{true}, jeśli \lstinline{recentPercentage} jest większe bądź równe \lstinline{maximumPercentageHalt}
+        \item \lstinline{bool CheckRecord()} - zwraca \lstinline{true}, jeśli \lstinline{recentPercentage} przekracza dotychczas odnotowany rekord i ustawia \lstinline{CurrentRecord} na \lstinline{recentPercentage}
+    \end{itemize}
+    
+    \textbf{HighestHitTest} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline|private double maximumPercentageHalt| - maksymalna zadana celność, po osiągnięciu której \lstinline{Train} w \lstinline{Network} zostaje przerwane.
+        \item \lstinline|private double recentPercentage| - ostatnia zarejestrowana celność
+    \end{itemize}
+    
+    
+    \textbf{MeanErrorTest} - Metody
+    \begin{itemize}
+         \item \lstinline{HighestHitTest(Network network, double minDelta = 0.001)} - tworzy nową instancję strategii testu
+        \item \lstinline{double Test(double[][] inputs, double[][] expectedOutputs)} - zwraca wynik testu dla danego zestawu testowego
+        \item \lstinline{bool CheckHalt()} - zwraca \lstinline{true} jeśli \lstinline{recentError} jest mniejsze bądź równe \lstinline{MinError}
+        \item \lstinline{bool CheckRecord()} - zwraca \lstinline{true} jeśli \lstinline{recentError} przekracza dotychczas odnotowany rekord i ustawia \lstinline{CurrentRecord} na \lstinline{recentError}
+    \end{itemize}
+    
+    
+    \textbf{MeanErrorTest} - Pola i Właściwości
+    \begin{itemize}
+        \item \lstinline|private Network network| - instancja klasy \lstinline{Network} obsługiwana przez ten test
+        \item \lstinline|private double minError| - zaplecze dla \lstinline{MinError}
+        \item \lstinline|public double MinError{ get; set; }| - minimalny błąd, do którego ma się zbliżyć sieć
+        \item \lstinline|public double CurrentRecord { get; private set; }| - bieżący rekord
+        \item \lstinline|private double recentError| - ostatni zarejestrowany błąd
+    \end{itemize}
+        
+	\subsection*{Testy}
+	%Tutaj powinna pojawić się analiza uzyskanych wyników oraz wykresy/pomiary.
+
+\hspace{20pt} Początkowo planowaliśmy nauczyć sieć neuronową rozpoznawania trzech filmów animowanych: \textit{Shrek 2}, \textit{Madagaskar} oraz \textit{Rybki z ferajny}. Niestety ze względu na duże podobieństwo dokładność rozpoznawania kadrów była dosyć niska - dla zbioru testowego złożonego z 25 kadrów przypadających na jeden film (i zbioru treningowego złożonego ze 225 kadrów / film) w szczytowych momentach osiągała zaledwie 65\% skuteczności. Zdecydowaliśmy powiększyć pulę do sześciu filmów poprzez dodanie tytułów bardziej różniących się od siebie: \textit{Indiana Jones}, \textit{Twój Vincent} oraz \textit{Lego Przygoda}. Zarówno to jak i zwiększenie liczby testów poskutkowało znalezieniem optymalnej architektury sieci neuronowej, a co za tym idzie zwiększeniem jej skuteczności, co przedstawia poniższa tabela:
+	
+\begin{center}
+\begin{tabular}{|| c | c ||} 
+\hline
+\multicolumn{2}{||c||}{Architektura: 1 warstwa ukryta, 50 neuronów} \\
+ \hline
+ Liczba filmów & Maks. dokładność \\
+ \hline
+ 4 & 76.0 \% \\
+ \hline
+ 5 & 71.2 \% \\ 
+ \hline
+ 6 & 52.7 \% \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+\vspace{10pt}
+Powyższe wyniki uzyskano przy zastosowaniu współczynnika nauczania $\eta$ na poziomie 0.05 oraz współczynnika korekcji $\alpha$ w bipolarnej liniowej funkcji aktywacji na poziomie 0.5. Co ciekawe sieć o jednej 10-neuronowej warstwie ukrytej również charakteryzowała się wysokimi osiągami: 
+
+\begin{center}
+\begin{tabular}{|| c | c ||} 
+\hline
+\multicolumn{2}{||c||}{Architektura: 1 warstwa ukryta, 10 neuronów} \\
+ \hline
+ Liczba filmów & Maks. dokładność \\
+ \hline
+ 4 & 75.0 \% \\
+ \hline
+ 5 & 68.8 \% \\ 
+ \hline
+ 6 & 58.0 \% \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+W obu powyższych tabelach w testach dotyczących 5 filmów zrezygnowano z filmu ,,Shrek 2'', a w przypadku 4 filmów dodatkowo nie uwzględniono filmu ,,Madagaskar''. Przetestowano także uczenie się sieci dla zestawu 4 filmów, w którym w miejsce tytułu ,,Rybki z ferajny'' znalazł się ,,Madagaskar''. W większości przypadków sieć ta miała skuteczność o 10 punktów procentowych niższą niż gdy w zestawie znajdował się pierwszy z tytułów.
+
+\vspace{10pt}
+Ze względu na fakt wykorzystania propagacji wstecznej jako algorytmu uczącego, często wzrost trafności predykcji sieci ,,utykał'' na nieakceptowalnym poziomie i tylko w niewielkiej ilości testów osiągała ona zadowalający poziom. Z tego powodu w późniejszych testach zdecydowaliśmy się na douczanie wstępnie nauczonej sieci neuronowej poprzez randomizację wag. Ponadto zastosowaliśmy strategię polegającą na stopniowym zwiększaniu ilości rozpoznawanych klas dla jednego modelu. Więcej na ten temat w rozdziale ,,Eksperymenty''.
+
+\vspace{10pt}
+
+\begin{center}
+\begin{tabular}{|| c | c ||} 
+\hline
+\multicolumn{2}{||c||}{Architektura: 3 warstwy ukryte, kolejno: 800, 200 i 50 neuronów} \\
+ \hline
+ Liczba filmów & Maksymalna dokładność \\
+ \hline
+ 4 & 82.0 \% \\
+ \hline
+ 5 & 88.8 \% \\ 
+ \hline
+ 6 & 84.6 \% \\ 
+ \hline
+\end{tabular}
+\end{center}
+	
+	\subsection*{Eksperymenty}
+    \hspace{14pt} Głównym problemem, z którym zmagaliśmy się podczas uczenia sieci, było dobranie odpowiedniej architektury. Architektura ta zakłada względnie dużą dokładność oraz pojemność wystarczającą do nauczenia sieci rozpoznawania kilku klas, przy minimalnej ilości neuronów zapewniającej stosunkowo krótki czas uczenia. Początkowo, testy były wykonywane dla 4 klas. \par Do pewnego momentu, najlepsze rezultaty (76\% trafności) wydawała się przynosić architektura wyposażona w tylko jedną warstwę ukrytą, zawierającą zaledwie 50 neuronów. Z uwagi na bardzo niewielką pojemność takiej sieci postanowiliśmy poszukać większego modelu, który zapewni odpowiednią pojemność, przy jednoczesnej akceptowalnej szybkości uczenia. Finalnie obraliśmy model posiadający 3 warstwy ukryte, zawierające kolejno 800, 200 i 50 neuronów.
+    \par Uczenie algorytmem propagacji wstecznej ma jedną znaczącą wadę. Nie używa on żadnej heurystyki, która zabezpieczałaby sieć przed utknięciem w minimach lokalnych. Postanowiliśmy zaradzić jakoś temu problemowi. Zaskakująco skuteczne okazało się dodawanie losowej liczby z przedziału $[-0.002;0.002]$ do wag wszystkich połączeń. Operacja ta będzie zwana dalej ,,randomizacją''. W ten sposób udało nam się znacząco zwiększyć dokładność. Trudno jest jednak mówić o konkretnej wartości, gdyż metoda ta była używana jednocześnie ze stopniowym zwiększaniem ilości klas rozpoznawanych przez sieć.
+    \par Zwiększanie ilości klas, paradoksalnie przyniosło skok trafności predykcji wykonywanych przez naszą sieć. Skok ten nie zachodził jednak od razu. Potrzebne było kilka epok nauki, aby sieć dostosowała się do nowych warunków.
+    \par W chwili pisania tej dokumentacji, bezwzględna trafność dla sześciu klas, przewyższyła trafność uzyskiwaną w przypadku, gdy sieć ,,znała'' tylko cztery. Taki stan rzeczy jest wytłumaczalny przez fakt rosnącej ogólności klasyfikatora wytworzonego przez model dla zwiększającej się liczby klas.
+    \par Metodologia uczenia dla obranego przez nas modelu wyglądała następująco. Model uczony był do momentu gdy kilka lub kilkanaście kolejnych epok nie przynosiło żadnego postępu. Kolejnym etapem była randomizacja jego wag. W ten sposób powstawało trzech ,,potomków'' nauczonej wstępnie sieci. W następnym kroku nauka ,,potomków'' oraz wyjściowej sieci (lub w niektórych wypadkach czterech potomków) prowadzona była równolegle do momentu, gdy każda z instancji nie przestała robić postępów. Na końcu wybierany był najlepszy z nich, a cały proces, począwszy od randomizacji, był powtarzany.
+    \par Jednym z bardziej interesujących problemów, z którymi spotkaliśmy się w trakcie początkowej fazy poszukiwań, była znacząco spadająca dokładność w momencie dodania filmu ,,Shrek 2'' do klas problemu. Co ciekawe problem ten występował tylko dla małych, konkretnie klasyfikujących modeli. Po wstępnym nauczeniu na innych filmach, przy większej architekturze, problem został wyeliminowany.
+    %	Sekcję używamy gdy porównywaliśmy dwa lub więcej algorytmów, albo wykonywaliśmy jakies pomiery.
+	
+%	Warto dodać jakies wykresy jako obraz, albo tabele z wynikami. 
+	
+	%Wszyskie wyniki powinny być opisane/poddane komentarzowi i poddane analizie statystycznej.
+	\newpage
+	\section*{Pełen kod aplikacji}
+    \hspace{15pt} Kod znajduje się poniżej jak i również w repozytorium pod adresem: \\  \url{https://github.com/Madoxen/MLProject\_secondary}.
+    
+    
+
+
+\subsubsection*{DataPreparerTests.cs}
+\begin{lstlisting}
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DataPreparer;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+
+
+namespace DataPreparerTests
+{
+    [TestClass]
+    public class DataPreparerTests
+    {
+        [TestMethod]
+        public void TestDataCount()
+        {
+            ImageLearningData ld = DataPreparer.ImageDataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
+
+            Assert.AreEqual(200, ld.width);
+            Assert.AreEqual(100, ld.height);
+            Assert.AreEqual(60000, ld.data.Count); //200 * 100 * 3 (BGR)
+
+        }
+
+        [TestMethod]
+        public void TestDataCorrectness()
+        {
+            var a = DataPreparer.ImageDataPreparer.PrepareImage("Resources/test_1.jpg",200,100);
+            Bitmap b = new Bitmap("Resources/target_1.bmp");
+            int dataPos = 0;
+            for (int i = 0; i < b.Height; i++)
+            {
+                for (int j = 0; j < b.Width; j++)
+                {
+                    Color c = b.GetPixel(j,i);
+                    Assert.AreEqual(c.B, a.data[dataPos] * 255, 1);
+                    Assert.AreEqual(c.G, a.data[dataPos + 1] * 255, 1);
+                    Assert.AreEqual(c.R, a.data[dataPos + 2] * 255, 1);
+                    dataPos += 3;
+                }
+            }
+        }
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{DataPreparer.cs}
+\begin{lstlisting}
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.IO;
+using System;
+
+namespace DataPreparer
+{
+    //Prepares data from images
+    public static class ImageDataPreparer
+    {
+
+
+        ///<summary>
+        ///Prepares one image
+        ///Uses file name as a label, label search terminates at '_' after '_' signifies sample number
+        ///</summary>
+        public static ImageLearningData PrepareImage(string path, int targetWidth, int targetHeight)
+        {
+
+            int paddingRatio = 12;
+            //Extract data
+            Bitmap original = new Bitmap(path);
+
+
+            //Perform cropping and resize
+            Bitmap croppedToRatio = CropToRatio(original, 2.0);
+
+            Rectangle rect = new Rectangle(croppedToRatio.Width / paddingRatio,
+   croppedToRatio.Height / paddingRatio,
+   croppedToRatio.Width - (2 * (croppedToRatio.Width / paddingRatio)),
+   croppedToRatio.Height - (2 * (croppedToRatio.Height / paddingRatio)));
+
+
+            Bitmap cropped = CropBitmap(croppedToRatio, rect);
+            Bitmap resized = new Bitmap(cropped, new Size(targetWidth, targetHeight));
+            BitmapData data = resized.LockBits(new Rectangle(0, 0, resized.Width, resized.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            int depth = 3; //bytes per pixel
+            byte[] buffer = new byte[data.Width * data.Height * depth];
+
+            //copy pixels to buffer
+            unsafe
+            {
+                int Height = resized.Height;
+                int Width = resized.Width;
+                int pos = 0;
+                byte* ptr = (byte*)data.Scan0;
+                for (int y = 0; y < Height; y++)
+                {
+                    byte* ptr2 = ptr;
+                    for (int x = 0; x < Width; x++)
+                    {
+                        buffer[pos++] = *(ptr2++); //B
+                        buffer[pos++] = *(ptr2++); //G
+                        buffer[pos++] = *(ptr2++); //R
+                    }
+                    ptr += data.Stride;
+                }
+            }
+
+            resized.UnlockBits(data);
+
+            //Extract label
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            string[] tokens = fileName.Split("_");
+            string label = tokens[0];
+            int number = Convert.ToInt32(tokens[1]);
+
+            //Free GDI handles
+            resized.Dispose();
+            croppedToRatio.Dispose();
+            cropped.Dispose();
+            original.Dispose();
+
+            return new ImageLearningData(data.Width, data.Height, buffer, label, number);
+        }
+
+
+
+        ///<summary>
+        ///Prepares entire directory of images
+        ///</summary>
+        /// <param name="path">Path to directory that contains images</param>
+        /// <returns></returns>
+        public static ImageLearningData[] PrepareImages(string path, int width, int height)
+        {
+            string[] files = Directory.GetFiles(path, "*.png");
+            ImageLearningData[] result = new ImageLearningData[files.Length];
+            for (int i = 0; i < files.Length; i++)
+            {
+                result[i] = PrepareImage(files[i], width, height);
+            }
+            return result;
+        }
+
+        private static Bitmap CropBitmap(Bitmap img, Rectangle cropArea)
+        {
+            Bitmap bmpImage = new Bitmap(img);
+            return bmpImage.Clone(cropArea, bmpImage.PixelFormat);
+        }
+
+
+        private static Bitmap CropToRatio(Bitmap input, double expectedAR)
+        {
+            double AR = input.Width / input.Height;
+
+            if (AR > expectedAR) //cut width center wise
+            {
+                int cropAmount = input.Width - (int)(expectedAR * input.Height);
+                Rectangle rect = new Rectangle(cropAmount / 2,
+                0,
+                input.Width - cropAmount,
+                input.Height);
+
+                Bitmap target = new Bitmap(rect.Width, rect.Height);
+
+                using (Graphics g = Graphics.FromImage(target))
+                {
+                    g.DrawImage(input, new Rectangle(0, 0, target.Width, target.Height),
+                                     rect,
+                                     GraphicsUnit.Pixel);
+                }
+                return target;
+            }
+            else if (AR < expectedAR) //cut height center wise
+            {
+                int cropAmount = input.Height - (int)((double)input.Width / expectedAR);
+                Rectangle rect = new Rectangle(0,
+               cropAmount / 2,
+               input.Width,
+               input.Height - cropAmount);
+
+                Bitmap target = new Bitmap(rect.Width, rect.Height);
+
+                using (Graphics g = Graphics.FromImage(target))
+                {
+                    g.DrawImage(input, new Rectangle(0, 0, target.Width, target.Height),
+                                     rect,
+                                     GraphicsUnit.Pixel);
+                }
+                return target;
+            }
+            else
+            {
+                return input;
+            }
+
+        }
+
+
+
+    }
+
+
+
+
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{ImageLearningData.cs}
+\begin{lstlisting}
+using System.Collections.ObjectModel;
+
+
+namespace DataPreparer
+{
+    public struct ImageLearningData
+    {
+
+
+        /// <summary>
+        /// Array containing raw data
+        /// in BGR format
+        /// </summary>
+        public ReadOnlyCollection<double> data;
+
+
+        /// <summary>
+        /// Label for this image
+        /// </summary>
+        public string label;
+        /// <summary>
+        /// Sample number of this image
+        /// </summary>
+        public int number;
+
+        public readonly int width;
+        public readonly int height;
+
+
+        /// <summary>
+        /// Creates new instance of Image data
+        /// </summary>ImageData result = 
+        /// in R = nth pixel; G = (n+1)th pixel; B = (n+2)th pixel</param>
+        public ImageLearningData(int Width, int Height, byte[] rawData, string label, int number)
+        {
+            this.width = Width;
+            this.height = Height;
+            double[] d = new double[rawData.Length];
+            
+            for(int i = 0; i < rawData.Length; i++)
+            {
+                d[i] = ((double)rawData[i]/255.0);
+            }
+
+            this.data = new ReadOnlyCollection<double>(d);
+            //Assign label
+            this.label = label;
+            this.number = number;
+        }
+
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Program.cs}
+\begin{lstlisting}
+using System;
+using System.IO;
+using NeuralNetwork;
+using DataPreparer;
+using System.Collections.Generic;
+
+namespace MovieClassifierClient
+{
+    class Program
+    {
+        /// <summary>
+        /// Args: 
+        /// 0 - image path
+        /// 1 (optional, default: model.txt) - explicit model path
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+
+            //Argument load stuff
+
+            if (!File.Exists(args[0]))
+                throw new ArgumentException("Provided image path is not valid");
+
+            string imagePath = args[0];
+            string modelPath = "model.txt";
+            string labelPath = "labels.txt";
+
+            if (args.Length > 1)
+            {
+                if (File.Exists(args[1]))
+                {
+                    modelPath = args[1];
+                }
+                else
+                {
+                    throw new ArgumentException("Provided model path is not valid");
+                }
+            }
+
+            if (args.Length > 2)
+            {
+                if (File.Exists(args[2]))
+                {
+                    labelPath = args[2];
+                }
+                else
+                {
+                    throw new ArgumentException("Provided model path is not valid");
+                }
+            }
+
+
+
+            string[] labels = File.ReadAllLines(labelPath);
+
+
+
+            //We assume that we use depth 3 images (RGB)
+            Network net = Network.LoadNetworkFromFile(modelPath);
+            double[] imageData = LoadImage(imagePath, 50, 25);
+            net.PushInputValues(imageData);
+            List<double> output = net.GetOutput();
+            int predictedIndex = output.MaxAt();
+
+            Console.WriteLine("Predicted movie: " + labels[predictedIndex] + " with " + output[predictedIndex] + "% positiveness");
+
+
+
+        }
+
+        private static double[] LoadImage(string path, int targetWidth, int targetHeight)
+        {
+            double[] data = new double[targetWidth * targetHeight * 3];
+            DataPreparer.ImageDataPreparer.PrepareImage(path, targetWidth, targetHeight).data.CopyTo(data, 0);
+            return data;
+        }
+
+
+
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Loader.cs}
+\begin{lstlisting}
+using System.IO;
+using System;
+using System.Linq;
+using NeuralNetwork;
+using System.Collections.Generic;
+
+namespace NeuralNetwork.Tests
+{
+
+    public class Loader
+    {
+        /// <summary>
+        /// Test loader, loads data.csv file
+        /// Use only for simple tests
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static double[][][] Load(string path)
+        {
+            /*data:
+            [0] -> Input Data to be evaluated
+            [1] -> Expected Output Data
+            [2] -> Test Input Data
+            [3] -> Test Output Data*/
+            double[][][] finalData = new double[4][][];
+
+            List<double[]> learningInputData = new List<double[]>();
+            List<double[]> learningOutputData = new List<double[]>();
+            List<double[]> testInputData = new List<double[]>();
+            List<double[]> testOutputData = new List<double[]>();
+
+            string[] lines = File.ReadAllLines(path).Skip(1).ToArray();   //Start from second line
+            Shuffler.Shuffle(lines); //randomize data order
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] tokens = lines[i].Split(",");
+                double[] data = new double[4];
+                double[] output = new double[2];
+
+
+                //Load data
+                for (int j = 0; j < 4; j++)
+                {
+                    data[j] = Convert.ToDouble(tokens[j]);
+                }
+
+                //Load class
+                if (tokens[4] == "0")
+                {
+                    output = new double[] { 1.0, 0.0 };
+                }
+                else if (tokens[4] == "1")
+                {
+                    output = new double[] { 0.0, 1.0 };
+                }
+                else
+                {
+                    throw new Exception("Error while reading data file: Unrecognized object class");
+                }
+
+
+                if (i % 3 == 0) //take 30% of data as test data
+                {
+                    testInputData.Add(data);
+                    testOutputData.Add(output);
+                }
+                else //take 70% as learning data
+                {
+                    learningInputData.Add(data);
+                    learningOutputData.Add(output);
+                }
+            }
+
+
+            //Pack everything 
+            finalData[0] = learningInputData.ToArray();
+            learningInputData.Clear();
+            finalData[1] = learningOutputData.ToArray();
+            learningOutputData.Clear();
+            finalData[2] = testInputData.ToArray();
+            testInputData.Clear();
+            finalData[3] = testOutputData.ToArray();
+            testOutputData.Clear();
+
+            //Normalize data arrays (not output arrays as those are already normalized)
+            for (int i = 0; i < 4; i++)
+            {
+             //   finalData[0].SetColumn(Normalizator.Normalize(finalData[0].GetColumn(i), 0.0, 1.0), i);
+               // finalData[2].SetColumn(Normalizator.Normalize(finalData[2].GetColumn(i), 0.0, 1.0), i);
+            }
+
+
+
+
+            return finalData;
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{TestRecordTaking.cs}
+\begin{lstlisting}
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NeuralNetwork;
+
+namespace NeuralNetwork.Tests
+{
+
+    [TestClass]
+    public class TestRecordTaking
+    {
+        [TestMethod]
+        public void TestHighestHitTest()
+        {
+            Network net = new Network(0.05, 0.5, -1.0, 1.0, 4, new int[] { 4, 4, 4 }, 2);
+            //    net.testStrategy = new HighestHitTest(net);
+            net.testStrategy = new HighestHitTest(net);
+
+            double[][][] data = Loader.Load("data.csv");
+            net.Train(data, 3000);
+
+        }
+
+        [TestMethod]
+        public void TestMeanErrorTest()
+        {
+            Network net = new Network(0.05, 0.5, -1.0, 1.0, 4, new int[] { 4, 4, 4 }, 2);
+            //    net.testStrategy = new HighestHitTest(net);
+            net.testStrategy = new MeanErrorTest(net);
+
+            double[][][] data = Loader.Load("data.csv");
+            net.Train(data, 3000);
+
+        }
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Loader.cs}
+\begin{lstlisting}
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using DataPreparer;
+using NeuralNetwork;
+
+namespace MovieClassifierLearner
+{
+
+    public static class Loader
+    {
+        public static double[][][] Load(string path, int outputCount, int imageWidth, int imageHeight)
+        {
+            /*data:
+            [0] -> Input Data to be evaluated
+            [1] -> Expected Output Data
+            [2] -> Test Input Data
+            [3] -> Test Output Data*/
+            double[][][] finalData = new double[4][][];
+
+            List<double[]> inputData = new List<double[]>();
+            List<double[]> expectedOutputData = new List<double[]>();
+            List<double[]> testInputData = new List<double[]>();
+            List<double[]> testOutputData = new List<double[]>();
+            List<string> uniqueLabels = new List<string>();
+
+            { //Ensure that ImageLearningData[] will be disposed after scope exit
+                ImageLearningData[] data = ImageDataPreparer.PrepareImages("Resources", imageWidth, imageHeight);
+                //Pack data into double Data table
+
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    int labelIndex = uniqueLabels.IndexOf(data[i].label);
+                    if (labelIndex == -1)
+                    {
+                        uniqueLabels.Add(data[i].label);
+                        labelIndex = uniqueLabels.Count - 1;
+                    }
+
+                    //Assign expected output
+                    double[] output = new double[outputCount];
+                    output[labelIndex] = 1.0;
+
+                    //Assign input values
+                    double[] input = data[i].data.ToArray();
+
+                    //Decide between test set and learning set
+                    if (i % 10 == 0)
+                    {
+                        testInputData.Add(input);
+                        testOutputData.Add(output);
+                    }
+                    else
+                    {
+                        inputData.Add(input);
+                        expectedOutputData.Add(output);
+                    }
+                }
+            }
+
+            //Shuffling
+            int[] numbers = new int[inputData.Count];
+            for (int i = 0; i < numbers.Length; i++) numbers[i] = i;
+            Shuffler.Shuffle(numbers);
+            List<double[]> tmpInputData = new List<double[]>();
+            List<double[]> tmpOutputData = new List<double[]>();
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                tmpInputData.Add(inputData[numbers[i]]);
+                tmpOutputData.Add(expectedOutputData[numbers[i]]);
+            }
+            inputData = tmpInputData;
+            expectedOutputData = tmpOutputData;
+
+            //Pack everything 
+            finalData[0] = inputData.ToArray();
+            inputData.Clear();
+            finalData[1] = expectedOutputData.ToArray();
+            expectedOutputData.Clear();
+            finalData[2] = testInputData.ToArray();
+            testInputData.Clear();
+            finalData[3] = testOutputData.ToArray();
+            testOutputData.Clear();
+
+            //Output labels
+            File.WriteAllLines("labels.txt", uniqueLabels);
+
+            return finalData;
+        }
+
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Program.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+using System.IO;
+using DataPreparer;
+using NeuralNetwork;
+using System.Linq;
+using System.Globalization;
+
+namespace MovieClassifierLearner
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //Tensor dimensions
+            int imageWidth = 50;
+            int imageHeight = 25;
+            int imageDepth = 3; //number of colors
+
+            int outputCount = 5; // we need to know this in advance to avoid back tracking through images
+
+            // args[0] - Learning Rate
+            // args[1] - Alpha in Bipolar Linear Function
+            // args[2] - Minimum Init Weight
+            // args[3] - Maximum Init Weight
+            // args[4+] - Hidden Neurons
+            int[] hiddenNeurons = new int[args.Length - 4];
+            for (int i = 4; i < args.Length; i++) hiddenNeurons[i - 4] = Convert.ToInt32(args[i]);
+
+            Network net = new Network(ConvertUtil.ConvertArg(args[0]), ConvertUtil.ConvertArg(args[1]), 
+                ConvertUtil.ConvertArg(args[2]), ConvertUtil.ConvertArg(args[3]), 
+                imageWidth * imageHeight * imageDepth, hiddenNeurons, outputCount);
+            //Network net = Network.LoadNetworkFromFile("record_weights_HighestHitTest_0,74");
+            net.testStrategy = new HighestHitTest(net);
+
+            Console.WriteLine(" Loading data...");
+            double[][][] finalData = Loader.Load("Resources", outputCount, imageWidth, imageHeight);
+
+            //net.RandomizeWeights();
+            ClassifyMovies(finalData, net);
+            net.Train(finalData, 2);
+            ClassifyMovies(finalData, net);
+        }
+
+        public static void ClassifyMovies(double[][][] finalData, Network network)
+        {
+            List<double> outputs; int correct = 0;
+            for (int i = 0; i < finalData[2].Length; i++)
+            {
+                network.PushInputValues(finalData[2][i]);
+                outputs = network.GetOutput();
+                if (outputs.IndexOf(outputs.Max()) == finalData[3][i].ToList().IndexOf(1)) correct += 1;
+            }
+            Console.WriteLine($" Correct ones: {correct}/{finalData[2].Length} ");
+        }
+
+
+
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Normalizator.cs}
+\begin{lstlisting}
+using System;
+
+namespace ML.Lib
+{
+    public class Normalizator
+    {
+        static double Max(double[] input)
+        {
+            double result = double.MinValue;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (result < input[i])
+                    result = input[i];
+            }
+            return result;
+        }
+
+        static double Min(double[] input)
+        {
+            double result = double.MaxValue;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (result > input[i])
+                    result = input[i];
+            }
+            return result;
+        }
+
+        public static double[] Normalize(double[] input, double nmin, double nmax)
+        {
+            double[] result = new double[input.Length];
+            double min = Min(input);
+            double max = Max(input);
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                result[i] = ((input[i] - min) / (max - min)) * (nmax - nmin) + nmin;
+            }
+            return result;
+        }
+
+     
+
+
+
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Shuffler.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+
+namespace NeuralNetwork
+{
+    public class Shuffler
+    {
+        public static void Shuffle<T>(T[] input)
+        {
+            Random rand = new Random();
+            for (int i = 0; i < input.Length; i++)
+            {
+                Swap<T>(input, i, rand.Next(0, input.Length - 1));
+            }
+        }
+
+        static void Swap<T>(T[] input, int a, int b)
+        {
+            T buff = input[a];
+            input[a] = input[b];
+            input[b] = buff;
+        }
+
+    }
+}
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{HighestHitTest.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    public class HighestHitTest : ITestStrategy
+    {
+        private Network network;
+        private double maximumPercentageHalt;
+        private double recentPercentage;
+        public double CurrentRecord { get; private set; }
+
+
+        public HighestHitTest(Network network, double maximumPercentageHalt = 100)
+        {
+            this.network = network;
+            this.maximumPercentageHalt = maximumPercentageHalt;
+        }
+
+        public double Test(double[][] inputs, double[][] expectedOutputs)
+        {
+            double hitPercentage = 0;
+            int hits = 0;
+            List<double> outputs = new List<double>();
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                network.PushInputValues(inputs[i]);
+                outputs = network.GetOutput();
+                if (outputs.MaxAt() == expectedOutputs[i].MaxAt())
+                    hits++;
+            }
+            hitPercentage = (double)hits / (double)inputs.Length;
+            recentPercentage = hitPercentage;
+            Console.WriteLine($" Hit percentage : {Math.Round(hitPercentage * 100.0, 3)}%");
+            return hitPercentage;
+        }
+
+        public bool CheckHalt()
+        {
+            return recentPercentage >= maximumPercentageHalt;
+        }
+
+        public bool CheckRecord()
+        {
+            if (CurrentRecord < recentPercentage)
+            {
+                CurrentRecord = recentPercentage;
+                return true;
+            }
+            return false;
+        }
+    }
+
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{MeanErrorTest.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    public class MeanErrorTest : ITestStrategy
+    {
+
+        private Network network;
+        private double minError;
+        public double MinError
+        {
+            get { return minError; }
+            set { minError = value; }
+        }
+
+        public double CurrentRecord { get; private set; }
+
+        private double recentError;
+
+
+        public MeanErrorTest(Network network, double minError = 0.001)
+        {
+            this.network = network;
+            this.minError = minError;
+            CurrentRecord = double.MaxValue;
+        }
+
+        public double Test(double[][] inputs, double[][] expectedOutputs)
+        {
+            double error = 0;
+            List<double> outputs = new List<double>();
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                network.PushInputValues(inputs[i]);
+                outputs = network.GetOutput();
+                error += Functions.CalculateError(outputs, i, expectedOutputs);
+            }
+            error /= inputs.Length;
+            recentError = error;
+            Console.WriteLine($" Average mean square error: {Math.Round(error, 5)}");
+
+            return error;
+        }
+
+        public bool CheckHalt()
+        {
+            return recentError <= minError;
+        }
+
+        public bool CheckRecord()
+        {
+            if (CurrentRecord > recentError)
+            {
+                CurrentRecord = recentError;
+                return true;
+            }
+            return false;
+        }
+    }
+
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Network.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+
+namespace NeuralNetwork
+{
+    public class Network
+    {
+        static double LearningRate { get; set; }
+        static double SynapsesCount { get; set; }
+        internal List<Layer> Layers;
+        internal double[][] ExpectedResult;
+        double[][] ErrorFunctionChanges;
+
+        public ITestStrategy testStrategy;
+        public bool TestHaltEnabled { get; set; }
+
+        public bool TestingEnabled { get; set; }
+
+        public bool RecordSaveEnabled { get; set; }
+
+        public Network(double learningrate, double alpha, double mininitweight, double maxinitweight, int numInputNeurons,
+        int[] hiddenLayerSizes, int numOutputNeurons, bool testHaltEnabled = false, bool testingEnabled = true, bool recordSaveEnabled = true)
+        {
+            Console.WriteLine("\n Building neural network...");
+            if (numInputNeurons < 1 || hiddenLayerSizes.Length < 1 || numOutputNeurons < 1)
+                throw new Exception("Incorrect Network Parameters");
+
+            Functions.Alpha = alpha;
+            Synapse.MinInitWeight = mininitweight;
+            Synapse.MaxInitWeight = maxinitweight;
+            LearningRate = learningrate;
+            this.testStrategy = new MeanErrorTest(this);
+            this.TestHaltEnabled = testHaltEnabled;
+            this.TestingEnabled = testingEnabled;
+            this.RecordSaveEnabled = recordSaveEnabled;
+
+            Layers = new List<Layer>();
+            AddFirstLayer(numInputNeurons);
+            for (int i = 0; i < hiddenLayerSizes.Length; i++)
+                AddNextLayer(new Layer(hiddenLayerSizes[i]));
+            AddNextLayer(new Layer(numOutputNeurons));
+
+            SynapsesCount = Synapse.SynapsesCount;
+
+            ErrorFunctionChanges = new double[Layers.Count][];
+            for (int i = 1; i < Layers.Count; i++)
+                ErrorFunctionChanges[i] = new double[Layers[i].Neurons.Count];
+        }
+
+        private void AddFirstLayer(int inputneuronscount)
+        {
+            Layer inputlayer = new Layer(inputneuronscount);
+            foreach (Neuron neuron in inputlayer.Neurons)
+                neuron.AddInputSynapse(0);
+            Layers.Add(inputlayer);
+        }
+
+        private void AddNextLayer(Layer newlayer)
+        {
+            Layer lastlayer = Layers[Layers.Count - 1];
+            lastlayer.ConnectLayers(newlayer);
+            Layers.Add(newlayer);
+        }
+
+        public void PushInputValues(double[] inputs)
+        {
+            if (inputs.Length != Layers[0].Neurons.Count)
+                throw new Exception("Incorrect Input Size");
+
+            for (int i = 0; i < inputs.Length; i++)
+                Layers[0].Neurons[i].PushValueOnInput(inputs[i]);
+        }
+
+        public void PushExpectedValues(double[][] expectedvalues)
+        {
+            if (expectedvalues[0].Length != Layers[Layers.Count - 1].Neurons.Count)
+                throw new Exception("Incorrect Expected Output Size");
+
+            ExpectedResult = expectedvalues;
+        }
+
+        public List<double> GetOutput()
+        {
+            List<double> output = new List<double>();
+            for (int i = 0; i < Layers.Count; i++)
+                Layers[i].CalculateOutputOnLayer();
+            foreach (Neuron neuron in Layers[Layers.Count - 1].Neurons)
+                output.Add(neuron.OutputValue);
+            return output;
+        }
+
+
+        /// <summary>
+        /// Trains network with given data
+        /// </summary>
+        /// <param name="data">
+        /// [0] -> Input Data to be evaluated
+        /// [1] -> Expected Output Data
+        /// [2] -> Test Input Data
+        /// [3] -> Test Output Data</param>
+        /// <param name="epochCount"></param>
+        public void Train(double[][][] data, int epochCount)
+        {
+            double[][] inputs = data[0], expectedOutputs = data[1];
+            double[][] testInputs = data[2], testOutputs = data[3];
+
+            PushExpectedValues(expectedOutputs);
+
+            Console.WriteLine(" Training neural network...");
+            for (int i = 0; i < epochCount; i++)
+            {
+                List<double> outputs = new List<double>();
+                for (int j = 0; j < inputs.Length; j++)
+                {
+                    PushInputValues(inputs[j]);
+                    outputs = GetOutput();
+                    ChangeWeights(outputs, j);
+                }
+
+                if (TestingEnabled == true)
+                {
+                    testStrategy.Test(testInputs, testOutputs);
+                    if (testStrategy.CheckHalt() && TestHaltEnabled == true)
+                        break;
+                    if (testStrategy.CheckRecord() && RecordSaveEnabled == true)
+                        SaveNetworkToFile(@"record_weights" + "_" + testStrategy.GetType().Name.ToString() + "_" + Math.Round(testStrategy.CurrentRecord, 2).ToString() + ".txt");
+                }
+            }
+        }
+
+        public void RandomizeWeights()
+        {
+            for (int i = 1; i < Layers.Count; i++)
+            {
+                Layers[i].RandomizeWeights();
+            }
+        }
+
+        private void CalculateErrorFunctionChanges(List<double> outputs, int row)
+        {
+            for (int i = 0; i < Layers[Layers.Count - 1].Neurons.Count; i++)
+                ErrorFunctionChanges[Layers.Count - 1][i] = (ExpectedResult[row][i] - outputs[i])
+                    * Functions.BipolarDifferential(Layers[Layers.Count - 1].Neurons[i].InputValue);
+            for (int k = Layers.Count - 2; k > 0; k--)
+                for (int i = 0; i < Layers[k].Neurons.Count; i++)
+                {
+                    ErrorFunctionChanges[k][i] = 0;
+                    for (int j = 0; j < Layers[k + 1].Neurons.Count; j++)
+                        ErrorFunctionChanges[k][i] += ErrorFunctionChanges[k + 1][j] * Layers[k + 1].Neurons[j].Inputs[i].Weight;
+                    ErrorFunctionChanges[k][i] *= Functions.BipolarDifferential(Layers[k].Neurons[i].InputValue);
+                }
+        }
+
+        private void ChangeWeights(List<double> outputs, int row)
+        {
+            CalculateErrorFunctionChanges(outputs, row);
+            for (int k = Layers.Count - 1; k > 0; k--)
+                for (int i = 0; i < Layers[k].Neurons.Count; i++)
+                    for (int j = 0; j < Layers[k - 1].Neurons.Count; j++)
+                        Layers[k].Neurons[i].Inputs[j].Weight +=
+                            LearningRate * 2 * ErrorFunctionChanges[k][i] * Layers[k - 1].Neurons[j].OutputValue;
+        }
+
+        public void SaveNetworkToFile(string path)
+        {
+            List<string> tmp = new List<string>();
+            for (int i = 1; i < Layers.Count; i++)
+                foreach (Neuron neuron in Layers[i].Neurons)
+                    foreach (Synapse synapse in neuron.Inputs)
+                        tmp.Add(synapse.Weight.ToString(CultureInfo.InvariantCulture));
+            
+            string build = $"{LearningRate.ToString()} {Functions.Alpha.ToString()} {Synapse.MinInitWeight} {Synapse.MaxInitWeight}";
+            foreach (Layer layer in Layers) build += " " + layer.Neurons.Count.ToString();
+            tmp.Insert(0, build);
+            File.WriteAllLines(path, tmp);
+        }
+
+
+        // loading from .txt file where in first line there are: learning rate, alpha, minimum init weight, 
+        // maximum init weight and sizes of all layers - all separated by spaces; other lines are synapse weights 
+        // (one per line)
+        public static Network LoadNetworkFromFile(string path)
+        {
+            string[] lines = File.ReadAllLines(path);
+            string[] firstLine = lines[0].Split();
+            List<int> hiddenLayerSizes = new List<int>();
+            for (int i = 5; i < firstLine.Length - 1; i++) 
+                hiddenLayerSizes.Add(Convert.ToInt32(firstLine[i]));
+            
+            Network net = new Network(ConvertUtil.ConvertArg(firstLine[0]), ConvertUtil.ConvertArg(firstLine[1]), 
+                ConvertUtil.ConvertArg(firstLine[2]), ConvertUtil.ConvertArg(firstLine[3]), Convert.ToInt32(firstLine[4]), 
+                hiddenLayerSizes.ToArray(), Convert.ToInt32(firstLine[firstLine.Length - 1]));
+
+            Console.WriteLine(" Loading weights...");
+            if (lines.Length - 1 != SynapsesCount)
+                Console.WriteLine(" Incorrect input file.");
+            else
+            {
+                try
+                {
+                    int i = 1;
+                    for (int j = 1; j < net.Layers.Count; j++)
+                        foreach (Neuron neuron in net.Layers[j].Neurons)
+                            foreach (Synapse synapse in neuron.Inputs)
+                                synapse.Weight = ConvertUtil.ConvertArg(lines[i++]);
+                }
+                catch (Exception) { Console.WriteLine(" Incorrect input file."); }
+            }
+            return net;
+        }
+
+
+        public int GetLayerSize(int layerIndex)
+        {
+            return Layers[layerIndex].Neurons.Count;
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{ConvertUtil.cs}
+\begin{lstlisting}
+using System;
+using System.Globalization;
+
+namespace NeuralNetwork
+{
+    public static class ConvertUtil
+    {
+        public static double ConvertArg(string d)
+        {
+            return Double.Parse(d.Replace(',', '.'), CultureInfo.InvariantCulture);
+        }
+    }
+
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Neuron.cs}
+\begin{lstlisting}
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    class Neuron
+    {
+        public List<Synapse> Inputs { get; set; }
+        public List<Synapse> Outputs { get; set; }
+        public double InputValue { get; set; }
+        public double OutputValue { get; set; }
+
+        public Neuron()
+        {
+            Inputs = new List<Synapse>();
+            Outputs = new List<Synapse>();
+        }
+
+        public void AddOutputNeuron(Neuron outputneuron)
+        {
+            Synapse synapse = new Synapse(this, outputneuron);
+            Outputs.Add(synapse); outputneuron.Inputs.Add(synapse);
+        }
+
+        public void AddInputSynapse(double input)
+        {
+            Synapse syn = new Synapse(this, input);
+            Inputs.Add(syn);
+        }
+
+        public void CalculateOutput()
+        {
+            InputValue = Functions.InputSumFunction(Inputs);
+            OutputValue = Functions.BipolarLinearFunction(InputValue);
+        }
+
+        public void PushValueOnInput(double input) 
+        { 
+            Inputs[0].PushedData = input; 
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{ITestStrategy.cs}
+\begin{lstlisting}
+namespace NeuralNetwork
+{
+    public interface ITestStrategy
+    {
+        double CurrentRecord {get;}
+        double Test(double[][] input, double[][] expectedOutput);
+        bool CheckHalt();
+        bool CheckRecord();
+    }
+
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Synapse.cs}
+\begin{lstlisting}
+using System;
+
+namespace NeuralNetwork
+{
+    class Synapse
+    {
+        static Random rnd = new Random();
+        internal Neuron FromNeuron, ToNeuron;
+        public double Weight { get; set; }
+        public double PushedData { get; set; }
+        public static int SynapsesCount { get; set; } = 0;
+        public static double MaxInitWeight { get; set; }
+        public static double MinInitWeight { get; set; }
+
+        public Synapse(Neuron fromneuron, Neuron toneuron) // standard synapse
+        {
+            FromNeuron = fromneuron; ToNeuron = toneuron;
+            Weight = rnd.NextDouble() * (MaxInitWeight - MinInitWeight) + MinInitWeight;
+            SynapsesCount += 1;
+        }
+
+        public Synapse(Neuron toneuron, double data) // input synapse for first layer
+        {
+            ToNeuron = toneuron; PushedData = data; 
+            Weight = 1;
+        }
+
+        public double GetOutput()
+        {
+            if (FromNeuron == null) return PushedData; // if it is first layer
+            return FromNeuron.OutputValue * Weight;
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Functions.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    class Functions
+    {
+        public static double Alpha { get; set; }
+
+        public static double CalculateError(List<double> outputs, int row, double[][] expectedresults) // objective function
+        {
+            double error = 0;
+            for (int i = 0; i < outputs.Count; i++)
+                error += Math.Pow(outputs[i] - expectedresults[row][i], 2);
+            return error;
+        }
+
+        public static double InputSumFunction(List<Synapse> Inputs) 
+            // input function: sum of products of synapses' weights and neurons' outputs
+        {
+            double input = 0;
+            foreach (Synapse syn in Inputs) 
+                input += syn.GetOutput();
+            return input;
+        }
+
+        public static double BipolarLinearFunction(double input) // activation function...
+            => (1 - Math.Pow(Math.E, -Alpha * input)) / (1 + Math.Pow(Math.E, -Alpha * input));
+
+        public static double BipolarDifferential(double input) // ... and her differential
+            => (2 * Alpha * Math.Pow(Math.E, -Alpha * input)) / (Math.Pow(1 + Math.Pow(Math.E, -Alpha * input), 2));
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{ListExtensions.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    public static class ListExtensions
+    {
+
+        public static int MaxAt<T>(this IList<T> set) where T : IComparable<T>
+        {
+            T maxValue = set[0];
+            int index = 0;
+            for (int i = 0; i < set.Count; i++)
+            {
+                if (maxValue.CompareTo(set[i]) < 0)
+                {
+                    index = i;
+                    maxValue = set[i];
+                }
+            }
+            return index;
+        }
+
+    }
+
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{ArrayExtensions.cs}
+\begin{lstlisting}
+using System;
+
+namespace ML.Lib
+{
+    public static class ArrayExtensions
+    {
+
+        //Gets "columnIndex" column from given set
+        //This function expects that the set is an rectangular matrix
+        public static T[] GetColumn<T>(this T[][] set, int columnIndex)
+        {
+            T[] result = new T[set.Length];
+            for (int i = 0; i < set.Length; i++)
+            {
+                result[i] = set[i][columnIndex];
+            }
+            return result;
+        }
+
+
+        //Sets "columnIndex"-column in set with given "column"
+        //This method expects that the set is an rectangular matrix
+        //And that the given data does not exceed any 
+        public static void SetColumn<T>(this T[][] set, T[] column, int columnIndex)
+        {
+            for (int i = 0; i < set.Length; i++)
+            {
+                set[i][columnIndex] = column[i];
+            }
+        }
+
+        //returns index of maximum element
+        public static int MaxAt<T>(this T[] set) where T : IComparable<T>
+        {
+            T maxValue = set[0];
+            int index = 0;
+            for (int i = 0; i < set.Length; i++)
+            {
+                if (maxValue.CompareTo(set[i]) < 0)
+                {
+                    index = i;
+                    maxValue = set[i];
+                }
+            }
+            return index;
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{Layer.cs}
+\begin{lstlisting}
+using System;
+using System.Collections.Generic;
+
+namespace NeuralNetwork
+{
+    class Layer
+    {
+
+        private static Random r = new Random();
+        public List<Neuron> Neurons;
+
+        public Layer(int numberofneurons)
+        {
+            Neurons = new List<Neuron>();
+            for (int i = 0; i < numberofneurons; i++)
+                Neurons.Add(new Neuron());
+        }
+
+        public void ConnectLayers(Layer outputlayer)
+        {
+            foreach (Neuron thisneuron in Neurons)
+                foreach (Neuron thatneuron in outputlayer.Neurons)
+                    thisneuron.AddOutputNeuron(thatneuron);
+        }
+
+        public void CalculateOutputOnLayer()
+        {
+            foreach (Neuron neuron in Neurons)
+                neuron.CalculateOutput();
+        }
+
+
+        /// <summary>
+        /// Randomizes weights using Box Muller distribution algorithm
+        /// Based on: http://neuralnetworksanddeeplearning.com/chap3.html#weight_initialization
+        /// </summary>
+        public void RandomizeWeights()
+        {
+            foreach (Neuron n in Neurons)
+            {
+                foreach (Synapse s in n.Inputs)
+                {
+                    s.Weight = r.NextDouble() * Math.Sqrt(2.0 / (Neurons.Count + n.Inputs.Count));
+                }
+            }
+        }
+    }
+}\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{screen\_maker.py}
+\begin{lstlisting}
+import os
+
+moviename = ""
+def mkdir(name):
+    os.system("mkdir "+name)
+    global moviename
+    moviename = name
+
+def screenshot(name):
+    os.system("scrot -z "+os.path.dirname(os.path.abspath(__file__))+"/"+moviename+"/"+name+".png") # z argument prevents beeping\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{netflix\_controls.py}
+\begin{lstlisting}
+from pymouse import PyMouse
+import time
+playX = 50
+playY = 1020
+
+forwardX = 260
+forwardY = 1020
+
+centerX = 200
+centerY = 200
+
+
+m = PyMouse()
+
+
+
+def wait_for_hide():
+    m.move(x=centerX,y=centerY)
+    time.sleep(4)
+
+def play_pause():
+    m.click(button=1,x=playX,y=playY)
+    time.sleep(0.52)
+
+def forward(n=1):
+    for i in range(n):
+        m.click(button=1,x=forwardX,y=forwardY)
+        time.sleep(0.52)
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{script.py}
+\begin{lstlisting}
+import netflix_controls as nc
+import screen_maker as sm
+import sys
+import time
+
+begin_offset = 0 #seconds
+
+name = ""
+try:
+    name = sys.argv[1]
+except:
+    print("no movie name given!")
+
+if name is not "":
+    print("starting taking screenshots for movie: "+name)
+    print("leave stopped movie on fulscreen at 0:0")
+    for i in range(10,-1,-1):
+        time.sleep(1)
+        print("starting in "+str(i)+" !")
+
+    print("here we go!!!")
+    
+    sm.mkdir(name)
+
+    nc.play_pause()
+    nc.play_pause()
+    nc.forward(int(begin_offset/10))
+
+    i = 0
+    while True:
+        nc.wait_for_hide()
+        sm.screenshot(name+"_"+str(i))
+        nc.forward()
+        nc.forward()
+        i+=1
+        
+
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{randomize.py}
+\begin{lstlisting}
+import sys
+from random import uniform
+lines = open(sys.argv[1], "r").readlines()
+h = lines[0]
+lines = lines[1:]
+r = float(sys.argv[2])
+print(h,end = "")
+for i in lines:
+    print(float(i)+uniform(-r,r))
+
+\end{lstlisting}
+\pagebreak
+
+
+\subsubsection*{extend.py}
+\begin{lstlisting}
+import sys
+from random import randint
+lines = open(sys.argv[1], "r").readlines()
+h = lines[0]
+lines = lines[1:]
+num = int(sys.argv[2])
+
+print(h,end = "")
+s = len(lines)
+
+for i in range(num):
+    lines.append(lines[randint(0,s)])
+
+for i in lines:
+        print(float(i))
+
+
+\end{lstlisting}
+\pagebreak
+
+
+    
+\end{document}
